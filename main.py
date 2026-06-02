@@ -5,16 +5,21 @@
 
 
 # -------== imports ==-------
+
 import pygame as pg
+from pygame.locals import *
 import time
 from ENGsettings import *
 from CybrocksLibrary import Button
+from ENGLIB import *
 import shutil
 import os
+from tkinter import messagebox
 import tkinter as tk
 import webbrowser
 import re
 import subprocess
+import importlib.util
 
 
 # -------== colors ==--------------------------------------------------------------------------------------------------------------
@@ -29,7 +34,8 @@ def main():
     # -------== setting up ==--------------------------------------------------------------------------------------------------------------
     
     pg.init()
-
+    
+    RES = (1200, 800) # res as moved here for dynamic screen scaleing
     window = pg.display.set_mode(RES)
     pg.display.set_caption('Enter a name in the box :)')
 
@@ -39,7 +45,7 @@ def main():
 
     # -------== audio ==--------------------------------------------------------------------------------------------------------------
     
-    
+    click = pg.mixer.Sound('resources\sounds\click.wav')
     
     
     # -------== creation of project or opening it ==--------------------------------------------------------------------------------------------------------------
@@ -73,16 +79,7 @@ def main():
         pass
     
 
-    fileS = f"{name}/settings.py" #change the name in the settings.py of the project
-
-    with open(fileS, "r") as file:
-        content = file.read()
-
-
-    content = re.sub(r"^NAME\s*=.*$",f"NAME = '{name}'",content,flags=re.MULTILINE)
-
-    with open(fileS, "w") as file:
-        file.write(content)
+    updatename(name)
     
 
     # -------== init other stuff ==--------------------------------------------------------------------------------------------------------------
@@ -92,10 +89,29 @@ def main():
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
     
-    buttonDelay = False #single click instead of repeating output
+    #button stuff
+
+    buttonDelay = False #single click instead of repeating output, also have to have multiple to prevent problems I totaly did not spend hours trying to figure out
+    buttonDelay2 = False
+    buttonDelay3 = False
+    buttonDelay4 = False
+    buttonDelay5 = False
+    buttonDelay6 = False
     
+    #grid
+
     mapx = 0
-    mapy = 0
+    mapy = 300
+    scale = 0.25
+    
+    #pannels
+
+    screenA = False
+    screenS = False
+
+    #other
+
+    scrolly = 0
     
 
     # -------== buttons ==--------------------------------------------------------------------------------------------------------------
@@ -105,11 +121,26 @@ def main():
     CompileB = Button("resources/textures/CompButton.png", (1000, 480), 3, 3)
     testB = Button("resources/textures/tButton.png", (1000, 400), 3, 3)
     PlayerSB = Button("resources/textures/PSButton.png", (1000, 320), 3, 3)
+    projectFB = Button("resources/textures/PFButton.png", (1000, 240), 3, 3)
+    audioB = Button("resources/textures/AButton.png", (1000, 160), 3, 3)
+    settingsB = Button("resources/textures/SButton.png", (1000, 90), 3, 3)
+    EaudioB = Button("resources/textures/EAButton.png", (1210, 10), 3, 3)
+    GspeedB = Button("resources/textures/speedpoint5.png", (25, 460), 3, 3)
     
+    if EngineAudio == True:
+        EaudioB.new_image("resources/textures/EATButton.png", (1210, 10), 3, 3)
+    else:
+        EaudioB.new_image("resources/textures/EAButton.png", (1210, 10), 3, 3)
+        
     upB = Button("resources/textures/up.png", (160, 425), 3, 3)
     downB = Button("resources/textures/down.png", (160, 485), 3, 3)
     leftB = Button("resources/textures/left.png", (100, 485), 3, 3)
     rightB = Button("resources/textures/right.png", (220, 485), 3, 3)
+    
+    zplusB = Button("resources/textures/plus.png", (100, 425), 3, 3) # the z is zoom
+    zminusB = Button("resources/textures/minus.png", (220, 425), 3, 3)
+    wplusB = Button("resources/textures/plus.png", (100, 700), 3, 3) # the w is wall
+    wminusB = Button("resources/textures/minus.png", (220, 700), 3, 3)
 
 
     # -------== main loop ==--------------------------------------------------------------------------------------------------------------
@@ -123,64 +154,190 @@ def main():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
             ):
                 running = False
+                
+            if event.type == MOUSEWHEEL:
+                scrolly += event.y
+                print(scrolly)
         
+
+
         if creditsB.is_pressed() and buttonDelay == False:
             
+            clickA(click)
             webbrowser.open('https://cybrock9000.github.io/CyberWolfGames')
             buttonDelay = True
+            
         elif creditsB.is_pressed() and buttonDelay == True:
             pass
         else: 
              buttonDelay = False
         
-        if helpB.is_pressed() and buttonDelay == False:
+
+
+        if helpB.is_pressed() and buttonDelay2 == False:
+            
+            clickA(click)
             webbrowser.open('https://cybrock9000.github.io/CyberWolfGames/engineDocs.html')
-            buttonDelay = True
-        elif helpB.is_pressed() and buttonDelay == True:
+            buttonDelay2 = True
+            
+        elif helpB.is_pressed() and buttonDelay2 == True:
             pass
         else: 
-             buttonDelay = False
+             buttonDelay2 = False
              
-        if testB.is_pressed() and buttonDelay == False:
+
+
+        if testB.is_pressed() and buttonDelay3 == False:
+            
+            clickA(click)
             subprocess.run(["python", f"{name}/main.py"])
-            buttonDelay = True
-        elif testB.is_pressed() and buttonDelay == True:
+            buttonDelay3 = True
+            
+        elif testB.is_pressed() and buttonDelay3 == True:
             pass
         else: 
-             buttonDelay = False
+             buttonDelay3 = False
              
+
+
+        if audioB.is_pressed() and buttonDelay4 == False:
+            clickA(click)
+            
+            if screenA == False and not screenS == True:
+                
+                RES = (1400, 800)
+                screenA = True
+                
+            elif not screenS == True:
+                
+                RES = (1200, 800)
+                screenA = False
+                
+            window = pg.display.set_mode(RES)
+            buttonDelay4 = True
+            
+        elif audioB.is_pressed() and buttonDelay4 == True:
+            pass
+        else: 
+             buttonDelay4 = False
+             # I LOVE ULTRAKILL MUSIC, SPECIFICLY ORDER
+             
+
+
+        if settingsB.is_pressed() and buttonDelay5 == False:
+            
+            clickA(click)
+            
+            if screenS == False and not screenA == True:
+                
+                RES = (1400, 800)
+                screenS = True
+                
+            elif not screenA == True:
+                
+                RES = (1200, 800)
+                screenS = False
+                
+            window = pg.display.set_mode(RES)
+            buttonDelay5 = True
+            
+        elif settingsB.is_pressed() and buttonDelay5 == True:
+            pass
+        
+        else: 
+             buttonDelay5 = False
+
+
+
+        if EaudioB.is_pressed() and buttonDelay6 == False:
+            
+            clickA(click)
+            EngineSfile = "ENGsettings.py"
+            
+            with open(EngineSfile, "r") as file:
+                
+                content = file.read()
+            if EngineAudio == False:
+                
+                content = re.sub(r"^EngineAudio\s*=.*$","EngineAudio = True",content,flags=re.MULTILINE)
+                EaudioB.new_image("resources/textures/EATButton.png", (1210, 10), 3, 3)
+                
+            else:
+                content = re.sub(r"^EngineAudio\s*=.*$","EngineAudio = False",content,flags=re.MULTILINE)
+                EaudioB.new_image("resources/textures/EAButton.png", (1210, 10), 3, 3)
+            
+            with open(EngineSfile, "w") as file:
+                
+                file.write(content)
+            buttonDelay6 = True
+            tk.messagebox.showwarning("info", "Restart to take request to effect!")
+            
+        elif EaudioB.is_pressed() and buttonDelay6 == True:
+            pass
+        else: 
+             
+             buttonDelay6 = False
+             
+
+
         if upB.is_pressed():
-            mapy += 0.01
+            mapy += 1
         if downB.is_pressed():
-            mapy -= 0.01
+            mapy -= 1
         if leftB.is_pressed():
-            mapx -= 0.01
+            mapx -= 1
         if rightB.is_pressed():
-            mapx += 0.01
+            mapx += 1
+            
+        if zplusB.is_pressed():
+            scale += 0.01
+        if zminusB.is_pressed():
+            scale -= 0.01
         
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
         window.fill('black')
-        pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0)
+        mapgrid(window, name, mapx, mapy, scale)
+        
+        pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0) #background
         pg.draw.rect(window, SPECIALDARKGREY, [400, 0, 1200, 800], 0)
-        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [390, 0, 10, 800], 0)
+                                                            #[x,y,w,h]
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [390, 0, 10, 800], 0) #lines
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [670, 0, 10, 800], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [390, 100, 560, 10], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [950, 0, 10, 800], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 550, 400, 10], 0)
-        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [950, 570, 400, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 400, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [950, 570, 600, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [1190, 0, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 790, 1400, 10], 0)
+        
         
         creditsB.draw(window)
         helpB.draw(window)
         CompileB.draw(window)
         testB.draw(window)
         PlayerSB.draw(window)
+        projectFB.draw(window)
+        audioB.draw(window)
+        settingsB.draw(window)
+        
+        if screenS == True:
+            EaudioB.draw(window)
 
         upB.draw(window)
         downB.draw(window)
         leftB.draw(window)
         rightB.draw(window)
+        GspeedB.draw(window)
+        
+        zplusB.draw(window)
+        zminusB.draw(window)
+        wplusB.draw(window)
+        wminusB.draw(window)
+
         
 
         # -------== update screen ==--------------------------------------------------------------------------------------------------------------
@@ -192,6 +349,27 @@ def main():
 
     pg.quit()
 
+
+# -------== ZA GRID!!!!!!!!!!!!! ==--------------------------------------------------------------------------------------------------------------
+
+def mapgrid(window,name, x, y, scale): #this is how the map is drawn in the grid
+
+    mapPath = os.path.join(name, "map.py") #used importlib to load the map_data and wallamount
+    module = importlib.util.spec_from_file_location(f"{name}_map",mapPath)
+    mapFile = importlib.util.module_from_spec(module)
+    module.loader.exec_module(mapFile)
+
+    grid = mapFile.wall_data
+    wallamount = mapFile.wallamount
+    
+    for walls in range(wallamount):
+        x1, y1, x2, y2, c = grid[walls]
+        pg.draw.line(window,c,(((x1-x)*scale),((-y1+y)*scale)),((x2-x)*scale,(-y2+y)*scale),2) #drawing walls
+    #this whole script was easyer than I thought
+    
+def clickA(click):
+    if EngineAudio == True:
+        click.play()
 
 if __name__ == "__main__":
     main()
