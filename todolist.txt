@@ -1,5 +1,5 @@
 not done = finish the template:
-    not done = easy map loading with external file or just a one line var
+    done kinda = easy map loading with external file or just a one line var
     not done = player movement and collision
     not done = textureing
     not done = 2d objects/sprites
@@ -17,5 +17,5 @@ not done = finish the engine:
     not done = audio stuff
 
 not done = finish ENGLIB:
-    not done = have all calls to writing to the game run through here
+    done at this point in time = have all calls to writing to the game run through here
     not done = the custom coding language
