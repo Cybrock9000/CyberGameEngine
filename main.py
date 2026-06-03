@@ -10,7 +10,7 @@ import pygame as pg
 from pygame.locals import *
 import time
 from ENGsettings import *
-from CybrocksLibrary import Button
+from CybrocksLibrary import *
 from ENGLIB import *
 import shutil
 import os
@@ -85,6 +85,7 @@ def main():
     # -------== init other stuff ==--------------------------------------------------------------------------------------------------------------
     
     clock = pg.time.Clock()
+    pg.mouse.set_visible(False)
     
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
@@ -97,12 +98,26 @@ def main():
     buttonDelay4 = False
     buttonDelay5 = False
     buttonDelay6 = False
+    buttonDelay7 = False
+    buttonDelay8 = False
+    buttonDelay9 = False
     
-    #grid
+    #grid and editor
 
     mapx = 0
     mapy = 300
     scale = 0.25
+    
+    cmapx = 0
+    cmapy = 0
+    
+    pointx = 0
+    pointy = 0
+    pointx2 = 0
+    pointy2 = 0
+    point = 0
+    
+    gspeed = 0.5
     
     #pannels
 
@@ -113,6 +128,10 @@ def main():
 
     scrolly = 0
     
+    # -------== images ==--------------------------------------------------------------------------------------------------------------
+    
+    cursor = BetterImage("resources/textures/mapC.png", (0, 0), 5, 5)
+    Gcursor = BetterImage("resources/textures/C.png", (0, 0), 3, 3)
 
     # -------== buttons ==--------------------------------------------------------------------------------------------------------------
     
@@ -125,7 +144,7 @@ def main():
     audioB = Button("resources/textures/AButton.png", (1000, 160), 3, 3)
     settingsB = Button("resources/textures/SButton.png", (1000, 90), 3, 3)
     EaudioB = Button("resources/textures/EAButton.png", (1210, 10), 3, 3)
-    GspeedB = Button("resources/textures/speedpoint5.png", (25, 460), 3, 3)
+    
     
     if EngineAudio == True:
         EaudioB.new_image("resources/textures/EATButton.png", (1210, 10), 3, 3)
@@ -136,11 +155,20 @@ def main():
     downB = Button("resources/textures/down.png", (160, 485), 3, 3)
     leftB = Button("resources/textures/left.png", (100, 485), 3, 3)
     rightB = Button("resources/textures/right.png", (220, 485), 3, 3)
+    GspeedB = Button("resources/textures/speedpoint5.png", (25, 460), 3, 3)
+    zoomB = Button("resources/textures/setzoomto1.png", (320, 460), 3, 3)
     
     zplusB = Button("resources/textures/plus.png", (100, 425), 3, 3) # the z is zoom
     zminusB = Button("resources/textures/minus.png", (220, 425), 3, 3)
     wplusB = Button("resources/textures/plus.png", (100, 700), 3, 3) # the w is wall
     wminusB = Button("resources/textures/minus.png", (220, 700), 3, 3)
+    
+    
+    
+    wupB = Button("resources/textures/up.png", (160, 575), 3, 3)
+    wdownB = Button("resources/textures/down.png", (160, 635), 3, 3)
+    wleftB = Button("resources/textures/left.png", (100, 635), 3, 3)
+    wrightB = Button("resources/textures/right.png", (220, 635), 3, 3)
 
 
     # -------== main loop ==--------------------------------------------------------------------------------------------------------------
@@ -220,7 +248,7 @@ def main():
             pass
         else: 
              buttonDelay4 = False
-             # I LOVE ULTRAKILL MUSIC, SPECIFICLY ORDER
+             # I LOVE ULTRAKILL MUSIC, SPECIFICLY ORDER (thanke me later :) )
              
 
 
@@ -246,7 +274,19 @@ def main():
         
         else: 
              buttonDelay5 = False
+             
 
+        if projectFB.is_pressed() and buttonDelay7 == False:
+            
+            clickA(click)
+            path = os.getcwd()
+            subprocess.Popen(f'explorer /commit,"{path}\{name}\"')
+            buttonDelay7 = True
+            
+        elif projectFB.is_pressed() and buttonDelay7 == True:
+            pass
+        else: 
+             buttonDelay7 = False
 
 
         if EaudioB.is_pressed() and buttonDelay6 == False:
@@ -281,24 +321,102 @@ def main():
 
 
         if upB.is_pressed():
-            mapy += 1
+            mapy += gspeed
         if downB.is_pressed():
-            mapy -= 1
+            mapy -= gspeed
         if leftB.is_pressed():
-            mapx -= 1
+            mapx -= gspeed
         if rightB.is_pressed():
-            mapx += 1
+            mapx += gspeed
             
         if zplusB.is_pressed():
             scale += 0.01
         if zminusB.is_pressed():
             scale -= 0.01
+            
+        if wupB.is_pressed():
+            cmapy += 1
+        if wdownB.is_pressed():
+            cmapy -= 1
+        if wleftB.is_pressed():
+            cmapx -= 1
+        if wrightB.is_pressed():
+            cmapx += 1
+            
+        if GspeedB.is_pressed() and buttonDelay8 == False:
+            
+            clickA(click)
+            
+            if gspeed == 0.5:
+                gspeed = 1
+                GspeedB.new_image("resources/textures/speed1.png", (25, 460), 3, 3)
+            elif gspeed == 1:
+                gspeed = 2
+                GspeedB.new_image("resources/textures/speed2.png", (25, 460), 3, 3)
+            elif gspeed == 2:
+                gspeed = 5
+                GspeedB.new_image("resources/textures/speed5.png", (25, 460), 3, 3)
+            elif gspeed == 5:
+                gspeed = 10
+                GspeedB.new_image("resources/textures/speed10.png", (25, 460), 3, 3)
+            elif gspeed == 10:
+                gspeed = 0.5
+                GspeedB.new_image("resources/textures/speedpoint5.png", (25, 460), 3, 3)
+                
+            window = pg.display.set_mode(RES)
+            buttonDelay8 = True
+            
+        elif GspeedB.is_pressed() and buttonDelay8 == True:
+            pass
+        
+        else: 
+             buttonDelay8 = False
+             
+        if wplusB.is_pressed() and buttonDelay9 == False:
+            
+            clickA(click)
+            
+            if point == 0:
+                point = 1
+                pointx = cmapx / scale + mapx #this makes clicking with the grid pointer calculate the world pos instead of the grid pos
+                pointy = mapy - cmapy / scale - 300
+                print((pointx,pointy))
+            elif point == 1:
+                point = 0
+                pointx2 = cmapx / scale + mapx
+                pointy2 = mapy - cmapy / scale -300
+                print((pointx2,pointy2))
+            
+            buttonDelay9 = True
+            
+        elif wplusB.is_pressed() and buttonDelay9 == True:
+            pass
+        else: 
+             buttonDelay9 = False
+             
+        if zoomB.is_pressed() and buttonDelay10 == False:
+            
+            clickA(click)
+            
+            scale = 1
+            buttonDelay10 = True
+            
+        elif zoomB.is_pressed() and buttonDelay10 == True:
+            pass
+        else: 
+             buttonDelay10 = False
         
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
+
         window.fill('black')
         mapgrid(window, name, mapx, mapy, scale)
+        if point == 1:
+            pg.draw.line(window,'purple',(((pointx - mapx))* scale, ((-pointy + mapy))* scale -300),(((cmapx - mapx))* scale, ((-cmapy + mapy))* scale -300),2)
+
+        Gcursor.move(((mapx - cmapx), (mapy + -cmapy)))
+        Gcursor.draw(window)
         
         pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0) #background
         pg.draw.rect(window, SPECIALDARKGREY, [400, 0, 1200, 800], 0)
@@ -315,6 +433,7 @@ def main():
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 790, 1400, 10], 0)
         
         
+        #sidebar buttons
         creditsB.draw(window)
         helpB.draw(window)
         CompileB.draw(window)
@@ -324,21 +443,35 @@ def main():
         audioB.draw(window)
         settingsB.draw(window)
         
+        #expanding pannel buttons
         if screenS == True:
             EaudioB.draw(window)
 
+        #map movement buttons
         upB.draw(window)
         downB.draw(window)
         leftB.draw(window)
         rightB.draw(window)
         GspeedB.draw(window)
-        
         zplusB.draw(window)
         zminusB.draw(window)
+        zoomB.draw(window)
+        
+        #wall editor buttons
         wplusB.draw(window)
         wminusB.draw(window)
-
+        wupB.draw(window)
+        wdownB.draw(window)
+        wleftB.draw(window)
+        wrightB.draw(window)
         
+
+
+
+        mpos = pg.mouse.get_pos()
+        mx, my = mpos
+        cursor.move((mx, my))
+        cursor.draw(window)
 
         # -------== update screen ==--------------------------------------------------------------------------------------------------------------
         
@@ -366,6 +499,11 @@ def mapgrid(window,name, x, y, scale): #this is how the map is drawn in the grid
         x1, y1, x2, y2, c = grid[walls]
         pg.draw.line(window,c,(((x1-x)*scale),((-y1+y)*scale)),((x2-x)*scale,(-y2+y)*scale),2) #drawing walls
     #this whole script was easyer than I thought
+    
+    
+
+def mapEditor(window,name):
+    pass
     
 def clickA(click):
     if EngineAudio == True:

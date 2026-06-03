@@ -7,3 +7,5 @@ FPS = 60
 FOV = 1000
 
 SPEED = 100
+
+rayDist = 250

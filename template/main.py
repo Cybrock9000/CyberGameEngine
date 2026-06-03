@@ -103,6 +103,37 @@ def main():
     pg.quit()
         
 
+def ccw(A,B,C):
+    return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
+
+def intersect(A,B,C,D):
+    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
+
+def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there is a wall the player can see
+    pg.draw.circle(window, "blue", (px, py), 5)
+
+    for ray in range(10): #amount of rays
+        rayangle = (pa - 45 + ray * 10) * M.pi / 180 # the number *ing the ray is the angle between each ray
+
+        dx = M.sin(rayangle)
+        dy = M.cos(rayangle)
+
+        sx, sy = px, py
+
+        for move in range(rayDist): #the dist the ray travels
+            sx += dx 
+            sy += dy 
+
+            pg.draw.circle(window, "red", (sx, sy), 2)
+
+            if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
+                return False #a wall should be there
+
+    return True #no wall :(
+            
+    
+
+
 def draw(window,px,py,pz,pa,pl):    #drawing walls and such
     for walls in range(wallamount):
         
@@ -111,9 +142,14 @@ def draw(window,px,py,pz,pa,pl):    #drawing walls and such
 
         
         x1, y1, x2, y2, c = wall_data[walls] # wall cords and color
-
+        
         wx1, wy1 = x1 - px, y1 - py
         wx2, wy2 = x2 - px, y2 - py
+        
+        if raycast(window, px, py, pz, pa, x1, y1, x2, y2) == True:
+            continue
+        pg.draw.line(window,c,(x1,y1),(x2,y2),2)
+        
         socialdistfromcameradist = 0.1
         
         wallx[walls][0] = wx1 * radcos - wy1 * radsin
