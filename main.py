@@ -14,7 +14,7 @@ from CybrocksLibrary import *
 from ENGLIB import *
 import shutil
 import os
-from tkinter import messagebox
+from tkinter import messagebox,colorchooser
 import tkinter as tk
 import webbrowser
 import re
@@ -87,6 +87,13 @@ def main():
     clock = pg.time.Clock()
     pg.mouse.set_visible(False)
     
+
+    mapPath = os.path.join(name, "map.py") #used importlib to load the map_data and wallamount
+    module = importlib.util.spec_from_file_location(f"{name}_map",mapPath)
+    mapFile = importlib.util.module_from_spec(module)
+    module.loader.exec_module(mapFile)
+
+    
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
     
@@ -101,11 +108,13 @@ def main():
     buttonDelay7 = False
     buttonDelay8 = False
     buttonDelay9 = False
+    buttonDelay10 = False
+    buttonDelay11 = False
     
     #grid and editor
 
     mapx = 0
-    mapy = 300
+    mapy = 0
     scale = 0.25
     
     cmapx = 0
@@ -118,6 +127,11 @@ def main():
     point = 0
     
     gspeed = 0.5
+    cspeed = 1
+    
+    wallColor = (255,0,0)
+    grid = mapFile.wall_data
+    wallamount = mapFile.wallamount
     
     #pannels
 
@@ -163,12 +177,13 @@ def main():
     wplusB = Button("resources/textures/plus.png", (100, 700), 3, 3) # the w is wall
     wminusB = Button("resources/textures/minus.png", (220, 700), 3, 3)
     
-    
+    colorB = Button("resources/textures/color.png", (25, 635), 3, 3)
     
     wupB = Button("resources/textures/up.png", (160, 575), 3, 3)
     wdownB = Button("resources/textures/down.png", (160, 635), 3, 3)
     wleftB = Button("resources/textures/left.png", (100, 635), 3, 3)
     wrightB = Button("resources/textures/right.png", (220, 635), 3, 3)
+    CspeedB = Button("resources/textures/speed1.png", (25, 700), 3, 3)
 
 
     # -------== main loop ==--------------------------------------------------------------------------------------------------------------
@@ -335,13 +350,13 @@ def main():
             scale -= 0.01
             
         if wupB.is_pressed():
-            cmapy += 1
+            cmapy -= cspeed
         if wdownB.is_pressed():
-            cmapy -= 1
+            cmapy += cspeed
         if wleftB.is_pressed():
-            cmapx -= 1
+            cmapx -= cspeed
         if wrightB.is_pressed():
-            cmapx += 1
+            cmapx += cspeed
             
         if GspeedB.is_pressed() and buttonDelay8 == False:
             
@@ -378,14 +393,17 @@ def main():
             
             if point == 0:
                 point = 1
-                pointx = cmapx / scale + mapx #this makes clicking with the grid pointer calculate the world pos instead of the grid pos
-                pointy = mapy - cmapy / scale - 300
+                pointx, pointy = gcloc2 #this makes clicking with the grid pointer calculate the world pos instead of the grid pos
                 print((pointx,pointy))
+                
             elif point == 1:
                 point = 0
-                pointx2 = cmapx / scale + mapx
-                pointy2 = mapy - cmapy / scale -300
+                pointx2, pointy2 = gcloc2
                 print((pointx2,pointy2))
+                grid.append([pointx,-pointy,pointx2,-pointy2, wallColor])
+                wallamount += 1
+                print(grid)
+                savemap(name,grid,wallamount)
             
             buttonDelay9 = True
             
@@ -405,17 +423,58 @@ def main():
             pass
         else: 
              buttonDelay10 = False
+             
+        if colorB.is_pressed() and buttonDelay11 == False:
+            
+            clickA(click)
+            c1 = colorchooser.askcolor(title ="Choose color")
+            wallColor = c1[0]
+            buttonDelay11 = True
+            
+        elif colorB.is_pressed() and buttonDelay11 == True:
+            pass
+        else: 
+             buttonDelay11 = False
+             
+        if CspeedB.is_pressed() and buttonDelay12 == False:
+            
+            clickA(click)
+            
+            if cspeed == 1:
+                cspeed = 2
+                CspeedB.new_image("resources/textures/speed2.png", (25, 700), 3, 3)
+            elif cspeed == 2:
+                cspeed = 5
+                CspeedB.new_image("resources/textures/speed5.png", (25, 700), 3, 3)
+            elif cspeed == 5:
+                cmapx, cmapy = round(cmapx, -1), round(cmapy, -1)
+                cspeed = 10
+                CspeedB.new_image("resources/textures/speed10.png", (25, 700), 3, 3)
+            elif cspeed == 10:
+                cspeed = 1
+                CspeedB.new_image("resources/textures/speed1.png", (25, 700), 3, 3)
+                
+            window = pg.display.set_mode(RES)
+            buttonDelay12 = True
+            
+        elif CspeedB.is_pressed() and buttonDelay12 == True:
+            pass
+        
+        else: 
+             buttonDelay12 = False
         
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
 
         window.fill('black')
-        mapgrid(window, name, mapx, mapy, scale)
+        mapgrid(window, name, mapx, mapy, scale,grid,wallamount)
         if point == 1:
-            pg.draw.line(window,'purple',(((pointx - mapx))* scale, ((-pointy + mapy))* scale -300),(((cmapx - mapx))* scale, ((-cmapy + mapy))* scale -300),2)
-
-        Gcursor.move(((mapx - cmapx), (mapy + -cmapy)))
+            pg.draw.line(window,wallColor,(((pointx - mapx))* scale, ((pointy + mapy))* scale),(((cmapx - mapx))* scale, ((cmapy + mapy))* scale),2) #drawing the line for making new walls
+            
+        gcloc = ((cmapx-mapx)*scale, (cmapy+mapy)*scale)
+        gcloc2 = (cmapx, cmapy) #took me forever to realize it was just the cursor pos and not some fancy equation
+        Gcursor.move(gcloc)
         Gcursor.draw(window)
         
         pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0) #background
@@ -464,7 +523,8 @@ def main():
         wdownB.draw(window)
         wleftB.draw(window)
         wrightB.draw(window)
-        
+        colorB.draw(window)
+        CspeedB.draw(window)
 
 
 
@@ -485,15 +545,7 @@ def main():
 
 # -------== ZA GRID!!!!!!!!!!!!! ==--------------------------------------------------------------------------------------------------------------
 
-def mapgrid(window,name, x, y, scale): #this is how the map is drawn in the grid
-
-    mapPath = os.path.join(name, "map.py") #used importlib to load the map_data and wallamount
-    module = importlib.util.spec_from_file_location(f"{name}_map",mapPath)
-    mapFile = importlib.util.module_from_spec(module)
-    module.loader.exec_module(mapFile)
-
-    grid = mapFile.wall_data
-    wallamount = mapFile.wallamount
+def mapgrid(window,name, x, y, scale, grid, wallamount): #this is how the map is drawn in the grid
     
     for walls in range(wallamount):
         x1, y1, x2, y2, c = grid[walls]
@@ -501,9 +553,6 @@ def mapgrid(window,name, x, y, scale): #this is how the map is drawn in the grid
     #this whole script was easyer than I thought
     
     
-
-def mapEditor(window,name):
-    pass
     
 def clickA(click):
     if EngineAudio == True:
