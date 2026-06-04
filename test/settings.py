@@ -1,5 +1,5 @@
 
-NAME = 'template'
+NAME = 'test'
 VERSION = 1
 
 RES = (1200, 800)
