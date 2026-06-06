@@ -1,5 +1,5 @@
 
-#im autualy going to try to comment as much as posible for this project unlike my other projects 
+#im autualy going to try to comment as much as posible for this project unlike my other projects (horizon vibe)
 
 
 
@@ -14,6 +14,7 @@ from CybrocksLibrary import *
 from ENGLIB import *
 import shutil
 import os
+from os import listdir
 from tkinter import messagebox,colorchooser
 import tkinter as tk
 import webbrowser
@@ -93,13 +94,16 @@ def main():
     mapFile = importlib.util.module_from_spec(module)
     module.loader.exec_module(mapFile)
 
-    
+    scripts = [] #scripts, font and text had to be loaded early for the load scripts
+    font = pg.font.SysFont('Comic Sans MS', 12)
+    text = {}
+    loadScripts(name,font,text)
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
     
     #button stuff
 
-    buttonDelay = False #single click instead of repeating output, also have to have multiple to prevent problems I totaly did not spend hours trying to figure out
+    buttonDelay = False #single click instead of repeating output, also have to have multiple to prevent problems I totaly did not spend hours trying to figure out :/
     buttonDelay2 = False
     buttonDelay3 = False
     buttonDelay4 = False
@@ -129,6 +133,8 @@ def main():
     gspeed = 0.5
     cspeed = 1
     
+    snap = False
+    
     wallColor = (255,0,0)
     grid = mapFile.wall_data
     wallamount = mapFile.wallamount
@@ -149,21 +155,27 @@ def main():
 
     # -------== buttons ==--------------------------------------------------------------------------------------------------------------
     
-    creditsB = Button("resources/textures/CButton.png", (1000, 700), 3, 3)
+    creditsB = Button("resources/textures/CButton.png", (1000, 700), 3, 3) #used my button class to make buttons easyer
     helpB = Button("resources/textures/docsButton.png", (1000, 620), 3, 3)
     CompileB = Button("resources/textures/CompButton.png", (1000, 480), 3, 3)
     testB = Button("resources/textures/tButton.png", (1000, 400), 3, 3)
     PlayerSB = Button("resources/textures/PSButton.png", (1000, 320), 3, 3)
     projectFB = Button("resources/textures/PFButton.png", (1000, 240), 3, 3)
     audioB = Button("resources/textures/AButton.png", (1000, 160), 3, 3)
-    settingsB = Button("resources/textures/SButton.png", (1000, 90), 3, 3)
+    settingsB = Button("resources/textures/SButton.png", (1000, 80), 3, 3)
     EaudioB = Button("resources/textures/EAButton.png", (1210, 10), 3, 3)
-    
+    scrollIB = Button("resources/textures/EAButton.png", (1210, 90), 3, 3)
+     
     
     if EngineAudio == True:
         EaudioB.new_image("resources/textures/EATButton.png", (1210, 10), 3, 3)
     else:
         EaudioB.new_image("resources/textures/EAButton.png", (1210, 10), 3, 3)
+        
+    if mouseINV == True:
+        scrollIB.new_image("resources/textures/scrollButtonT.png", (1210, 90), 3, 3)
+    else:
+        scrollIB.new_image("resources/textures/scrollButton.png", (1210, 90), 3, 3)
         
     upB = Button("resources/textures/up.png", (160, 425), 3, 3)
     downB = Button("resources/textures/down.png", (160, 485), 3, 3)
@@ -184,7 +196,33 @@ def main():
     wleftB = Button("resources/textures/left.png", (100, 635), 3, 3)
     wrightB = Button("resources/textures/right.png", (220, 635), 3, 3)
     CspeedB = Button("resources/textures/speed1.png", (25, 700), 3, 3)
+    swupB = Button("resources/textures/up.png", (160, 575), 3, 3)
+    swdownB = Button("resources/textures/down.png", (160, 635), 3, 3)
+    swleftB = Button("resources/textures/left.png", (100, 635), 3, 3)
+    swrightB = Button("resources/textures/right.png", (220, 635), 3, 3)
+    
 
+
+    #blank script buttons
+    bsb1 = Button("resources/textures/blankButton.png", (740, 120), 3, 3)
+    bsb2 = Button("resources/textures/blankButton.png", (740, 200), 3, 3)
+    bsb3 = Button("resources/textures/blankButton.png", (740, 280), 3, 3)
+    bsb4 = Button("resources/textures/blankButton.png", (740, 360), 3, 3)
+    bsb5 = Button("resources/textures/blankButton.png", (740, 440), 3, 3)
+    bsb6 = Button("resources/textures/blankButton.png", (740, 520), 3, 3)
+    bsb7 = Button("resources/textures/blankButton.png", (740, 600), 3, 3)
+    bsb8 = Button("resources/textures/blankButton.png", (740, 680), 3, 3)
+
+    #blank object buttons
+
+    bob1 = Button("resources/textures/blankButton.png", (460, 120), 3, 3) # my army of bobs
+    bob2 = Button("resources/textures/blankButton.png", (460, 200), 3, 3)
+    bob3 = Button("resources/textures/blankButton.png", (460, 280), 3, 3)
+    bob4 = Button("resources/textures/blankButton.png", (460, 360), 3, 3)
+    bob5 = Button("resources/textures/blankButton.png", (460, 440), 3, 3)
+    bob6 = Button("resources/textures/blankButton.png", (460, 520), 3, 3)
+    bob7 = Button("resources/textures/blankButton.png", (460, 600), 3, 3)
+    bob8 = Button("resources/textures/blankButton.png", (460, 680), 3, 3)
 
     # -------== main loop ==--------------------------------------------------------------------------------------------------------------
     
@@ -199,8 +237,12 @@ def main():
                 running = False
                 
             if event.type == MOUSEWHEEL:
-                scrolly += event.y
-                print(scrolly)
+                if mouseINV:
+                    scrolly -= event.y*80
+                else:
+                    scrolly += event.y*80
+                if scrolly >= 0:
+                    scrolly = 0
         
 
 
@@ -349,13 +391,13 @@ def main():
         if zminusB.is_pressed():
             scale -= 0.01
             
-        if wupB.is_pressed():
+        if wupB.is_pressed() and snap == False:
             cmapy -= cspeed
-        if wdownB.is_pressed():
+        if wdownB.is_pressed() and snap == False:
             cmapy += cspeed
-        if wleftB.is_pressed():
+        if wleftB.is_pressed() and snap == False:
             cmapx -= cspeed
-        if wrightB.is_pressed():
+        if wrightB.is_pressed() and snap == False:
             cmapx += cspeed
             
         if GspeedB.is_pressed() and buttonDelay8 == False:
@@ -449,8 +491,10 @@ def main():
             elif cspeed == 5:
                 cmapx, cmapy = round(cmapx, -1), round(cmapy, -1)
                 cspeed = 10
-                CspeedB.new_image("resources/textures/speed10.png", (25, 700), 3, 3)
+                snap = True
+                CspeedB.new_image("resources/textures/speed10C.png", (25, 700), 3, 3)
             elif cspeed == 10:
+                snap = False
                 cspeed = 1
                 CspeedB.new_image("resources/textures/speed1.png", (25, 700), 3, 3)
                 
@@ -462,6 +506,85 @@ def main():
         
         else: 
              buttonDelay12 = False
+             
+        if swupB.is_pressed() and buttonDelay13 == False and snap == True:
+            
+            clickA(click)
+            
+            cmapy -= 10
+            buttonDelay13 = True
+            
+        elif swupB.is_pressed() and buttonDelay13 == True:
+            pass
+        else: 
+             buttonDelay13 = False
+             
+        if swdownB.is_pressed() and buttonDelay14 == False and snap == True:
+            
+            clickA(click)
+            
+            cmapy += 10
+            buttonDelay14 = True
+            
+        elif swdownB.is_pressed() and buttonDelay14 == True:
+            pass
+        else: 
+             buttonDelay14 = False
+             
+        if swleftB.is_pressed() and buttonDelay15 == False and snap == True:
+            
+            clickA(click)
+            
+            cmapx -= 10
+            buttonDelay15 = True
+            
+        elif swleftB.is_pressed() and buttonDelay15 == True:
+            pass
+        else: 
+             buttonDelay15 = False
+             
+
+        if swrightB.is_pressed() and buttonDelay16 == False and snap == True:
+            
+            clickA(click)
+            
+            cmapx += 10
+            buttonDelay16 = True
+            
+        elif swrightB.is_pressed() and buttonDelay16 == True:
+            pass
+        else: 
+             buttonDelay16 = False
+             
+
+        if scrollIB.is_pressed() and buttonDelay17 == False:
+            
+            clickA(click)
+            EngineSfile = "ENGsettings.py"
+            
+            with open(EngineSfile, "r") as file:
+                
+                content = file.read()
+            if mouseINV == False:
+                
+                content = re.sub(r"^mouseINV\s*=.*$","mouseINV = True",content,flags=re.MULTILINE)
+                scrollIB.new_image("resources/textures/scrollButtonT.png", (1210, 90), 3, 3)
+                
+            else:
+                content = re.sub(r"^mouseINV\s*=.*$","mouseINV = False",content,flags=re.MULTILINE)
+                scrollIB.new_image("resources/textures/scrollButton.png", (1210, 90), 3, 3)
+            
+            with open(EngineSfile, "w") as file:
+                
+                file.write(content)
+            buttonDelay17 = True
+            tk.messagebox.showwarning("info", "Restart to take request to effect!")
+            
+        elif scrollIB.is_pressed() and buttonDelay17 == True:
+            pass
+        else: 
+             
+             buttonDelay17 = False
         
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
@@ -491,6 +614,28 @@ def main():
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 10, 800], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 790, 1400, 10], 0)
         
+
+        #blank script buttons
+
+        bsb1.draw(window)
+        bsb2.draw(window)
+        bsb3.draw(window)
+        bsb4.draw(window)
+        bsb5.draw(window)
+        bsb6.draw(window)
+        bsb7.draw(window)
+        bsb8.draw(window)
+
+        scriptsPannel(text,window,scrolly)
+        
+        bob1.draw(window)
+        bob2.draw(window)
+        bob3.draw(window)
+        bob4.draw(window)
+        bob5.draw(window)
+        bob6.draw(window)
+        bob7.draw(window)
+        bob8.draw(window)
         
         #sidebar buttons
         creditsB.draw(window)
@@ -505,6 +650,7 @@ def main():
         #expanding pannel buttons
         if screenS == True:
             EaudioB.draw(window)
+            scrollIB.draw(window)
 
         #map movement buttons
         upB.draw(window)
@@ -519,10 +665,16 @@ def main():
         #wall editor buttons
         wplusB.draw(window)
         wminusB.draw(window)
-        wupB.draw(window)
-        wdownB.draw(window)
-        wleftB.draw(window)
-        wrightB.draw(window)
+        if snap == False:
+            wupB.draw(window)
+            wdownB.draw(window)
+            wleftB.draw(window)
+            wrightB.draw(window)
+        else: 
+            swupB.draw(window)
+            swdownB.draw(window)
+            swleftB.draw(window)
+            swrightB.draw(window)
         colorB.draw(window)
         CspeedB.draw(window)
 
@@ -553,8 +705,27 @@ def mapgrid(window,name, x, y, scale, grid, wallamount): #this is how the map is
     #this whole script was easyer than I thought
     
     
-    
-def clickA(click):
+def loadScripts(name,font,text):
+    global scripts
+    path = os.getcwd()
+    scripts = os.listdir((f'{path}/{name}/scripts'))
+    '''print((f'{path}/{name}/scripts'))
+    print(scripts)'''
+    for script in scripts:
+        text[script] = font.render(script, False, (0, 255, 0))
+
+
+def scriptsPannel(text, screen, scrolly):
+    e = 0
+    for i in text:
+        e += 1
+        ypos = (80 * e) + scrolly + 60
+        if ypos <= 120 or ypos >= 750: 
+            pass
+        else:
+            screen.blit(text[i], (760, ypos))
+        
+def clickA(click): #me being lazy
     if EngineAudio == True:
         click.play()
 

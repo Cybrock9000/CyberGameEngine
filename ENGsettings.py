@@ -8,3 +8,4 @@ FPS = 60
 #other
 
 EngineAudio = True
+mouseINV = False

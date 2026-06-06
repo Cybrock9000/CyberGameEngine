@@ -4,4 +4,4 @@ DO NOT TOUCH template UNLESS YOU KNOW WHAT YOU ARE DOING!!!
 The template folder is what this engine copies and uses to make your game 
 
 
-Background Story: https://cybrock9000.github.io/CyberWolfGames/engine.html
+More info here: https://cybrock9000.github.io/CyberWolfGames/engine.html

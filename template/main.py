@@ -3,6 +3,7 @@ from settings import *
 import time
 import math as M
 from map import*
+from os import listdir
 
 
 def main():
@@ -18,9 +19,7 @@ def main():
     
     clock = pg.time.Clock()
     
-    px = 0
-    py = 0
-    pz = 0
+    px,py,pz= playerStartPos
     
     dx = 0
     dy = 0
@@ -128,6 +127,7 @@ def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there
 
             if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
                 return False #a wall should be there
+
 
     return True #no wall :(
             

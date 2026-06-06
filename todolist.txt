@@ -1,5 +1,5 @@
 not done = finish the template:
-    done kinda = easy map loading with external file or just a one line var
+    done = easy map loading with external file or just a one line var
     not done = player movement and collision
     not done = textureing
     not done = 2d objects/sprites

@@ -34,3 +34,15 @@ def savemap(name,maplst,wallamount):
 
     with open(fileS, "w") as file:
         file.write(content)
+        
+def updatePlayerPos(name,pos):
+    fileS = f"{name}/settings.py" #change the players position
+
+    with open(fileS, "r") as file:
+        content = file.read()
+
+
+    content = re.sub(r"^playerStartPos\s*=.*$",f"playerStartPos = '{pos}'",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
