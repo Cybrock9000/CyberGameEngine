@@ -3,5 +3,6 @@ Completely made in python by: Cy.
 DO NOT TOUCH template UNLESS YOU KNOW WHAT YOU ARE DOING!!!
 The template folder is what this engine copies and uses to make your game 
 
+The demo folder is a little demonstration of what this little engine could do
 
 More info here: https://cybrock9000.github.io/CyberWolfGames/engine.html

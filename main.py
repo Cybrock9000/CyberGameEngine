@@ -4,6 +4,7 @@
 
 
 
+
 # -------== imports ==-------
 
 import pygame as pg
@@ -21,6 +22,7 @@ import webbrowser
 import re
 import subprocess
 import importlib.util
+import array
 
 
 # -------== colors ==--------------------------------------------------------------------------------------------------------------
@@ -30,14 +32,15 @@ ANEVENDARKERSPECIALDARKGREY = (26, 26, 43)
 
 
 
-def main():
+def main(): #looking back on it now, i could have used classes instead
     
     # -------== setting up ==--------------------------------------------------------------------------------------------------------------
     
     pg.init()
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "100,100"
     
-    RES = (1200, 800) # res as moved here for dynamic screen scaleing
-    window = pg.display.set_mode(RES)
+    
+    window = pg.display.set_mode((1,1))# (1,1) for dynamic screen scaleing
     pg.display.set_caption('Enter a name in the box :)')
 
     icon = pg.image.load('icon.ico').convert_alpha()
@@ -56,7 +59,7 @@ def main():
 
     name = ""
 
-    tk.Label(root, text="Enter Name of Project. A New Name Will Create a New Project. A preexisting Name Will Just Open it.").grid(row=0, column=0)
+    tk.Label(root, text="Enter Name of Project. A New Name Will Create a New Project. A Preexisting Name Will Just Open it. Want a Demonstration? Type: demo").grid(row=0, column=0)
 
     nameEntry = tk.Entry(root)
     nameEntry.grid(row=1, column=0)
@@ -81,7 +84,7 @@ def main():
     
 
     updatename(name)
-    
+    scaleScreen((1, 1), (1200, 800),window)
 
     # -------== init other stuff ==--------------------------------------------------------------------------------------------------------------
     
@@ -93,9 +96,19 @@ def main():
     module = importlib.util.spec_from_file_location(f"{name}_map",mapPath)
     mapFile = importlib.util.module_from_spec(module)
     module.loader.exec_module(mapFile)
+    
+    playerPath = os.path.join(name, "player.py")
+    pmodule = importlib.util.spec_from_file_location(f"{name}_player",playerPath)
+    playerFile = importlib.util.module_from_spec(pmodule)
+    pmodule.loader.exec_module(playerFile)
+    
+    settingsPath = os.path.join(name, "settings.py")
+    smodule = importlib.util.spec_from_file_location(f"{name}_settings",settingsPath)
+    settingsFile = importlib.util.module_from_spec(smodule)
+    smodule.loader.exec_module(settingsFile)
 
     scripts = [] #scripts, font and text had to be loaded early for the load scripts
-    font = pg.font.SysFont('Comic Sans MS', 12)
+    font = pg.font.SysFont('Comic Sans MS', 15)
     text = {}
     loadScripts(name,font,text)
     
@@ -143,6 +156,7 @@ def main():
 
     screenA = False
     screenS = False
+    screenG = False
 
     #other
 
@@ -151,20 +165,23 @@ def main():
     # -------== images ==--------------------------------------------------------------------------------------------------------------
     
     cursor = BetterImage("resources/textures/mapC.png", (0, 0), 5, 5)
-    Gcursor = BetterImage("resources/textures/C.png", (0, 0), 3, 3)
-
+    Gcursor = BetterImage("resources/textures/C.png", (0, 0), 3, 3) # \/ that workerd somehow \/
+    playerStart = BetterImage("resources/textures/playerStart.png",(playerFile.playerStartPos[0],playerFile.playerStartPos[1]),3, 3)
+    
     # -------== buttons ==--------------------------------------------------------------------------------------------------------------
     
     creditsB = Button("resources/textures/CButton.png", (1000, 700), 3, 3) #used my button class to make buttons easyer
     helpB = Button("resources/textures/docsButton.png", (1000, 620), 3, 3)
-    CompileB = Button("resources/textures/CompButton.png", (1000, 480), 3, 3)
-    testB = Button("resources/textures/tButton.png", (1000, 400), 3, 3)
-    PlayerSB = Button("resources/textures/PSButton.png", (1000, 320), 3, 3)
-    projectFB = Button("resources/textures/PFButton.png", (1000, 240), 3, 3)
-    audioB = Button("resources/textures/AButton.png", (1000, 160), 3, 3)
-    settingsB = Button("resources/textures/SButton.png", (1000, 80), 3, 3)
+    CompileB = Button("resources/textures/CompButton.png", (1000, 485), 3, 3)
+    testB = Button("resources/textures/tButton.png", (1000, 405), 3, 3)
+    PlayerSB = Button("resources/textures/PSButton.png", (1000, 325), 3, 3)
+    projectFB = Button("resources/textures/PFButton.png", (1000, 245), 3, 3)
+    audioB = Button("resources/textures/AButton.png", (1000, 165), 3, 3)
+    settingsB = Button("resources/textures/SButton.png", (1000, 5), 3, 3)
     EaudioB = Button("resources/textures/EAButton.png", (1210, 10), 3, 3)
     scrollIB = Button("resources/textures/EAButton.png", (1210, 90), 3, 3)
+    gameSB = Button("resources/textures/GSButton.png", (1000, 85), 3, 3)
+    darkB = Button("resources/textures/DButton.png", (1210, 10), 3, 3)
      
     
     if EngineAudio == True:
@@ -177,6 +194,11 @@ def main():
     else:
         scrollIB.new_image("resources/textures/scrollButton.png", (1210, 90), 3, 3)
         
+    if settingsFile.DARK == True:
+        darkB.new_image("resources/textures/DTButton.png", (1210, 10), 3, 3)
+    else:
+        darkB.new_image("resources/textures/DButton.png", (1210, 10), 3, 3)
+        
     upB = Button("resources/textures/up.png", (160, 425), 3, 3)
     downB = Button("resources/textures/down.png", (160, 485), 3, 3)
     leftB = Button("resources/textures/left.png", (100, 485), 3, 3)
@@ -188,8 +210,14 @@ def main():
     zminusB = Button("resources/textures/minus.png", (220, 425), 3, 3)
     wplusB = Button("resources/textures/plus.png", (100, 700), 3, 3) # the w is wall
     wminusB = Button("resources/textures/minus.png", (220, 700), 3, 3)
+    splusB = Button("resources/textures/plus.png", (725, 25), 3, 3) # the s is script
+    sminusB = Button("resources/textures/minus.png", (845, 25), 3, 3)
+    oplusB = Button("resources/textures/plus.png", (440, 25), 3, 3) # the s is script
+    ominusB = Button("resources/textures/minus.png", (560, 25), 3, 3)
     
     colorB = Button("resources/textures/color.png", (25, 635), 3, 3)
+    
+    pStartB = Button("resources/textures/playerB.png", (300, 635), 3, 3)
     
     wupB = Button("resources/textures/up.png", (160, 575), 3, 3)
     wdownB = Button("resources/textures/down.png", (160, 635), 3, 3)
@@ -225,16 +253,15 @@ def main():
     bob8 = Button("resources/textures/blankButton.png", (460, 680), 3, 3)
 
     # -------== main loop ==--------------------------------------------------------------------------------------------------------------
-    
-    running = True
-    while running:
+    runningMain = True
+    while runningMain:
         
         # -------== controls and keys and buttons ==--------------------------------------------------------------------------------------------------------------
         
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
             ):
-                running = False
+                runningMain = False
                 
             if event.type == MOUSEWHEEL:
                 if mouseINV:
@@ -288,17 +315,17 @@ def main():
         if audioB.is_pressed() and buttonDelay4 == False:
             clickA(click)
             
-            if screenA == False and not screenS == True:
+            if screenA == False and not screenS == True and not screenG == True:
                 
-                RES = (1400, 800)
+                scaleScreen((1200, 800), (1400, 800),window)
                 screenA = True
                 
-            elif not screenS == True:
+            elif not screenS == True and not screenG == True:
                 
-                RES = (1200, 800)
+                scaleScreen((1400, 800), (1200, 800),window)
                 screenA = False
-                
-            window = pg.display.set_mode(RES)
+
+
             buttonDelay4 = True
             
         elif audioB.is_pressed() and buttonDelay4 == True:
@@ -313,17 +340,17 @@ def main():
             
             clickA(click)
             
-            if screenS == False and not screenA == True:
+            if screenS == False and not screenA == True and not screenG == True:
                 
                 RES = (1400, 800)
+                scaleScreen((1200, 800), (1400, 800),window)
                 screenS = True
                 
-            elif not screenA == True:
+            elif not screenA == True and not screenG == True:
                 
-                RES = (1200, 800)
+                scaleScreen((1400, 800), (1200, 800),window)
                 screenS = False
                 
-            window = pg.display.set_mode(RES)
             buttonDelay5 = True
             
         elif settingsB.is_pressed() and buttonDelay5 == True:
@@ -346,7 +373,7 @@ def main():
              buttonDelay7 = False
 
 
-        if EaudioB.is_pressed() and buttonDelay6 == False:
+        if EaudioB.is_pressed() and buttonDelay6 == False and screenS == True:
             
             clickA(click)
             EngineSfile = "ENGsettings.py"
@@ -420,7 +447,7 @@ def main():
                 gspeed = 0.5
                 GspeedB.new_image("resources/textures/speedpoint5.png", (25, 460), 3, 3)
                 
-            window = pg.display.set_mode(RES)
+            
             buttonDelay8 = True
             
         elif GspeedB.is_pressed() and buttonDelay8 == True:
@@ -494,11 +521,14 @@ def main():
                 snap = True
                 CspeedB.new_image("resources/textures/speed10C.png", (25, 700), 3, 3)
             elif cspeed == 10:
+                cspeed = 20
+                CspeedB.new_image("resources/textures/speed20C.png", (25, 700), 3, 3)
+            elif cspeed == 20:
                 snap = False
                 cspeed = 1
                 CspeedB.new_image("resources/textures/speed1.png", (25, 700), 3, 3)
                 
-            window = pg.display.set_mode(RES)
+            
             buttonDelay12 = True
             
         elif CspeedB.is_pressed() and buttonDelay12 == True:
@@ -511,7 +541,7 @@ def main():
             
             clickA(click)
             
-            cmapy -= 10
+            cmapy -= cspeed
             buttonDelay13 = True
             
         elif swupB.is_pressed() and buttonDelay13 == True:
@@ -523,7 +553,7 @@ def main():
             
             clickA(click)
             
-            cmapy += 10
+            cmapy += cspeed
             buttonDelay14 = True
             
         elif swdownB.is_pressed() and buttonDelay14 == True:
@@ -535,7 +565,7 @@ def main():
             
             clickA(click)
             
-            cmapx -= 10
+            cmapx -= cspeed
             buttonDelay15 = True
             
         elif swleftB.is_pressed() and buttonDelay15 == True:
@@ -548,7 +578,7 @@ def main():
             
             clickA(click)
             
-            cmapx += 10
+            cmapx += cspeed
             buttonDelay16 = True
             
         elif swrightB.is_pressed() and buttonDelay16 == True:
@@ -557,7 +587,7 @@ def main():
              buttonDelay16 = False
              
 
-        if scrollIB.is_pressed() and buttonDelay17 == False:
+        if scrollIB.is_pressed() and buttonDelay17 == False and screenS == True:
             
             clickA(click)
             EngineSfile = "ENGsettings.py"
@@ -585,7 +615,80 @@ def main():
         else: 
              
              buttonDelay17 = False
+             
+        if PlayerSB.is_pressed() and buttonDelay18 == False:
+            
+            clickA(click)
+            path = os.getcwd()
+            subprocess.Popen(["notepad.exe", f"{path}\{name}\player.py"])
+            buttonDelay18 = True
+            
+        elif PlayerSB.is_pressed() and buttonDelay18 == True:
+            pass
+        else: 
+             buttonDelay18 = False
+             
+        if wminusB.is_pressed() and buttonDelay19 == False:
+            
+            clickA(click)
+            path = os.getcwd()
+            if len(grid) >= 0:
+                grid.pop()
+                wallamount -= 1
+                savemap(name,grid,wallamount)
+            buttonDelay19 = True
+            
+        elif wminusB.is_pressed() and buttonDelay19 == True:
+            pass
+        else: 
+             buttonDelay19 = False
+             
+        if pStartB.is_pressed() and buttonDelay20 == False:
+            
+            clickA(click)
+            updatePlayerPos(name, (cmapx, -cmapy, 20))
+            tk.messagebox.showwarning("info", "Restart to take request to effect in editor but should testing work!")
+            buttonDelay20 = True
+            
+        elif pStartB.is_pressed() and buttonDelay20 == True:
+            pass
+        else: 
+             buttonDelay20 = False
+             
+        if gameSB.is_pressed() and buttonDelay21 == False:
+            
+            clickA(click)
+            
+            if screenG == False and not screenA == True and not screenS == True:
+                
+                RES = (1400, 800)
+                scaleScreen((1200, 800), (1400, 800),window)
+                screenG = True
+                
+            elif not screenS == True and not screenA == True:
+                
+                scaleScreen((1400, 800), (1200, 800),window)
+                screenG = False
+                
+            buttonDelay21 = True
+            
+        elif gameSB.is_pressed() and buttonDelay21 == True:
+            pass
         
+        else: 
+             buttonDelay21 = False
+             
+        if darkB.is_pressed() and buttonDelay22 == False and screenG == True:
+            
+            clickA(click)
+            updateDarkness(name, -settingsFile.DARK)
+            tk.messagebox.showwarning("info", "Restart to take request to effect in editor but should testing work!")
+            buttonDelay22 = True
+            
+        elif darkB.is_pressed() and buttonDelay22 == True:
+            pass
+        else: 
+             buttonDelay22 = False
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
@@ -595,6 +698,9 @@ def main():
         if point == 1:
             pg.draw.line(window,wallColor,(((pointx - mapx))* scale, ((pointy + mapy))* scale),(((cmapx - mapx))* scale, ((cmapy + mapy))* scale),2) #drawing the line for making new walls
             
+        playerStart.move(((playerFile.playerStartPos[0]-mapx)*scale,(playerFile.playerStartPos[1]+mapy)*scale))
+        playerStart.draw(window)
+        
         gcloc = ((cmapx-mapx)*scale, (cmapy+mapy)*scale)
         gcloc2 = (cmapx, cmapy) #took me forever to realize it was just the cursor pos and not some fancy equation
         Gcursor.move(gcloc)
@@ -646,11 +752,15 @@ def main():
         projectFB.draw(window)
         audioB.draw(window)
         settingsB.draw(window)
+        gameSB.draw(window)
         
         #expanding pannel buttons
         if screenS == True:
             EaudioB.draw(window)
             scrollIB.draw(window)
+            
+        if screenG == True:
+            darkB.draw(window)
 
         #map movement buttons
         upB.draw(window)
@@ -665,6 +775,7 @@ def main():
         #wall editor buttons
         wplusB.draw(window)
         wminusB.draw(window)
+        
         if snap == False:
             wupB.draw(window)
             wdownB.draw(window)
@@ -676,7 +787,13 @@ def main():
             swleftB.draw(window)
             swrightB.draw(window)
         colorB.draw(window)
+        pStartB.draw(window)
         CspeedB.draw(window)
+        
+        splusB.draw(window)
+        sminusB.draw(window)
+        oplusB.draw(window)
+        ominusB.draw(window)
 
 
 
@@ -687,12 +804,12 @@ def main():
 
         # -------== update screen ==--------------------------------------------------------------------------------------------------------------
         
-        pg.display.set_caption(f'Engine   -={name}=-    -= Version {VERSION} =-      -= FPS: {clock.get_fps():.1f} =- ')
+        pg.display.set_caption(f'Engine   -={name}=-    -= Version {VERSION} =-      -= FPS: {clock.get_fps():.1f} =-      -={time.strftime('%H:%M:%S:')}=- ')
 
         pg.display.flip()
         clock.tick(FPS)
 
-    pg.quit()
+
 
 
 # -------== ZA GRID!!!!!!!!!!!!! ==--------------------------------------------------------------------------------------------------------------
@@ -704,7 +821,7 @@ def mapgrid(window,name, x, y, scale, grid, wallamount): #this is how the map is
         pg.draw.line(window,c,(((x1-x)*scale),((-y1+y)*scale)),((x2-x)*scale,(-y2+y)*scale),2) #drawing walls
     #this whole script was easyer than I thought
     
-    
+# -------== Pannels ==--------------------------------------------------------------------------------------------------------------
 def loadScripts(name,font,text):
     global scripts
     path = os.getcwd()
@@ -712,7 +829,7 @@ def loadScripts(name,font,text):
     '''print((f'{path}/{name}/scripts'))
     print(scripts)'''
     for script in scripts:
-        text[script] = font.render(script, False, (0, 255, 0))
+        text[script] = font.render(script, False, (0, 0, 0))
 
 
 def scriptsPannel(text, screen, scrolly):
@@ -724,10 +841,52 @@ def scriptsPannel(text, screen, scrolly):
             pass
         else:
             screen.blit(text[i], (760, ypos))
+            
         
 def clickA(click): #me being lazy
     if EngineAudio == True:
         click.play()
 
+def scaleScreen(start_res, end_res,window):
+    start_w, start_h = start_res
+    end_w, end_h = end_res
+
+    steps = 10
+    
+
+    scaleIMG = BetterImage("resources/textures/scale.png",(0,0),1, 1)
+
+
+    for i in range(steps + 1):
+        t = i / steps
+
+        w = int(start_w + (end_w - start_w) * t)
+        h = int(start_h + (end_h - start_h) * t)
+
+        pg.display.set_mode((w, h))
+        window.fill('black')
+    
+        pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0) #this drawing part is to make sure it doesnt look wierd when scailing
+        pg.draw.rect(window, SPECIALDARKGREY, [400, 0, 1200, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [390, 0, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [670, 0, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [390, 100, 560, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [950, 0, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 550, 400, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 400, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [950, 570, 600, 10], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [1190, 0, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 10, 800], 0)
+        pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 790, 1400, 10], 0)
+        scaleIMG.draw(window) # image to make it look even smoother
+        pg.display.flip()
+        pg.time.delay(5) #speed
+
+
+
 if __name__ == "__main__":
     main()
+    
+
+
+pg.quit()

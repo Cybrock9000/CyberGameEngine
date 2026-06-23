@@ -1,18 +1,19 @@
 not done = finish the template:
     done = easy map loading with external file or just a one line var
-    not done = player movement and collision
-    not done = textureing
+    done but janky = player movement and collision
     not done = 2d objects/sprites
     not done = simple raycast line for shooting/interacting
     not done = audio
-    not done = faster raycasting, maybe threading or multiprocesing
+    kinda done = faster raycasting, maybe threading or multiprocesing
+    not done = portals?
+    not done = hud elements
 
 not done = finish the engine:
-    not done = map editor
-        not done = be able to delete walls
+    done = map editor
+        kinda done = be able to delete walls
     not done = scripts in general
         not done = opening them
-        not done = having them list out in one of the panels
+        done = having them list out in one of the panels
     not done = object/sprite creation
     not done = list objects and sprites in one of the panels
     not done = compiler
@@ -22,5 +23,5 @@ not done = finish ENGLIB:
     done at this point in time = have all calls to writing to the game run through here
     not done = the custom coding language
 
-
+not done = demo project
 maybe keep the engine under 1.44mb (put it on a floppy drive some time soon)

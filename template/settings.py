@@ -6,9 +6,17 @@ RES = (1200, 800)
 FPS = 60
 FOV = 1000
 
-SPEED = 100
+rayDist = 300 #raycast dist and render dist
+rayAmount = 10 #amount of rays, the more = laggier but accurate, the less = fast but could miss a lot of walls
+SHADOW_DIST = rayDist / 15
+DARK = True
 
-rayDist = 300
-rayAmount = 10
+SKY_COLOR = (0,0,0)
 
-playerStartPos = (0,0,0)
+MOUSE_BORDER_LEFT = 100
+MOUSE_BORDER_RIGHT = RES[0] - MOUSE_BORDER_LEFT
+MOUSE_SENSITIVITY = 0.15
+MOUSE_SENSITIVITY_UD = 0.1
+MOUSE_MAX_REL = 40
+
+EHUD = True
