@@ -116,7 +116,7 @@ def main():
 
             
 
-            
+        #print(grounded)
         # jumping
         if keys[pg.K_SPACE] and grounded == True:
             grounded = False
@@ -135,14 +135,14 @@ def main():
             falling = True
             pz +=0.01*g
   
-            g += 12 #gravity
-        else: 
+            g += 100 *dt #gravity
+        elif pz >= 20: 
             falling  = False
             grounded = True
             g = 0
         
         if crouch and grounded and not falling and not jumping:
-            pz = 30
+            pz = 29
         elif not crouch and grounded and not falling and not jumping:
             pz = 20
         
@@ -208,23 +208,25 @@ def intersect(A,B,C,D):
     return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
 def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there is a wall the player can see
-    #pg.draw.circle(window, "blue", (px, py), 5)
+    pg.draw.circle(window, "blue", (px, py), 5)
 
     for ray in range(rayAmount): #amount of rays
-        rayangle = (pa - 45 + ray * 10) * M.pi / 180 # the number *ing the ray is the angle between each ray
+        
+        #it is recomended to keep the fov (not the var, the cone) at around 90
+
+        rayangle = (pa - 45 + ray * 3) * M.pi / 180 # the number *ing the ray is the angle between each ray
 
         dx = M.sin(rayangle)
         dy = M.cos(rayangle)
 
-        sx, sy = px, py
+        
 
-        for move in range(rayDist): #the dist the ray travels
-            sx += dx 
-            sy += dy 
-
-            #pg.draw.circle(window, "red", (sx, sy), 2)
-
-            if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
+        rayend = (
+            px + dx * rayDist,
+            py + dy * rayDist
+        )
+        #pg.draw.line(window, "red", (px, py),rayend, 2)
+        if intersect((px, py),rayend,(wx1, wy1), (wx2, wy2)):
                 return False #a wall should be there
 
 
@@ -344,8 +346,8 @@ def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
             pg.draw.circle(window,'red',(wallx[1],wally[1]),3)'''
             
         if DARK == True:
-            mx, my = midp2(x1,y1,x2,y2)
-
+            mx = (x1 + x2) / 2
+            my = (y1 + y2) / 2
 
             d = max(1, dist(px, py, mx, my))
             c2 = int((c[0] / (d))*SHADOW_DIST+1),int((c[1] / (d))*SHADOW_DIST+1),int((c[2] / (d))*SHADOW_DIST+1)
@@ -358,15 +360,12 @@ def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
         
 
     
-#math functions 
-def dist(x1,y1,x2,y2): # swear that the math library had a distance formula
+#math functions
+def dist(x1,y1,x2,y2):
     return(M.sqrt(M.pow((x2-x1),2)+M.pow((y2-y1),2)))
 
 def midp(x1,y1,x2,y2):
     return((x1 + x2) / 2, (y1 + y2) / 2)
-
-def midp2(x1,y1,x2,y2):
-    return(x1 + x2) / 2, (y1 + y2) / 2
 
 if __name__ == "__main__":
     main()

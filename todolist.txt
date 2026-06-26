@@ -4,7 +4,7 @@ not done = finish the template:
     not done = 2d objects/sprites
     not done = simple raycast line for shooting/interacting
     not done = audio
-    kinda done = faster raycasting, maybe threading or multiprocesing
+    done = faster raycasting, maybe threading or multiprocessing
     not done = portals?
     not done = hud elements
 
@@ -22,6 +22,15 @@ not done = finish the engine:
 not done = finish ENGLIB:
     done at this point in time = have all calls to writing to the game run through here
     not done = the custom coding language
+
+not done = finish IDE Editor:
+    not done = run code button
+    not done = scroll
+    not done = open projects
+    not done = have engine open projects
+    done = shifting in general
+    not done = run script in editor
+    not done = list files in the file dir
 
 not done = demo project
 maybe keep the engine under 1.44mb (put it on a floppy drive some time soon)

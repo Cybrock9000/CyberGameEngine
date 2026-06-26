@@ -3,11 +3,14 @@
 
 
 import pygame as pg
+from pygame.locals import *
 from pygame._sdl2 import Window
 import os
 import tkinter as tk
+from tkinter import filedialog
 import sys
 from CybrocksLibrary import *
+import json
 
 
 
@@ -19,28 +22,37 @@ def main():
     pg.init()
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     
-    window = pg.display.set_mode((1200,750), pg.NOFRAME)
+    window = pg.display.set_mode((1600,930), pg.NOFRAME)
     sdl_window = Window.from_display_module()
     
     font = pg.font.SysFont('Consolas', 20)
     sideFont = pg.font.SysFont('bold Consolas', 20)
     
-
     code = []
     line = ''
-    lookingatline = 1
 
+
+    '''loaded_lines = load().splitlines()
+
+    if loaded_lines:
+        code = loaded_lines[:-1]
+        line = loaded_lines[-1]'''
+    
+
+    lookingatline = len(code) + 1
+    uppercase = False
+    scrolly = 0
 
     # -------== colors ==--------------------------------------------------------------------------------------------------------------
 
-    pallet = pg.image.load("resources/textures/p.png") #thanks to the people on stack overflow
+    pallet = pg.image.load((os.getcwd() + "/IDEresources/textures/p.png")) #thanks to the people on stack overflow for loading colors from a pic
     image_rect = pallet.get_rect()
     
     window.fill((0,0,0))
     window.blit(pallet, image_rect)
     screensurf = pg.display.get_surface() #gets colors from picture for more customization
     
-    p = 1
+    p = 0 #pallet, which is y so there could be multiple in one pic
 
     main = screensurf.get_at((0,p))
     bg = screensurf.get_at((1,p))
@@ -49,9 +61,45 @@ def main():
     text1 = screensurf.get_at((2,p))
     titleBar = screensurf.get_at((5,p))
     
+    with open(os.getcwd() + "/IDEresources/languages/python.json", "r") as py: #load programing languages
+        specialwords = json.load(py)
+        
+        for keyword, data in specialwords.items():
+            palette_index = data[0]
+            data[0] = screensurf.get_at((palette_index, p))
+    
+    def drawcolorwords(surface, font, text, x, y):
+        words = text.split(" ")
+        cx = x
 
-    closeB = Button("resources/textures/closeB.png", (1175,5), 1, 1)
-    minB = Button("resources/textures/minB.png", (1145,5), 1, 1)
+        for word in words: #checks to see if its in the list and colors it here
+            color = text1 #normal text
+
+            for keyword, data in specialwords.items(): 
+                kcolor = data[0]
+                mode = data[1]
+
+                if mode == 0:
+                    if word == keyword: #color only if its exact like as
+                        color = kcolor
+                        break
+
+                elif mode == 1:
+                    if word.startswith(keyword): #color the full thing like print() (or even printasdjfhlaksjdhf wich i will have to fix soon)
+                        color = kcolor
+                        break
+
+            rendered = font.render(word, True, color)
+            surface.blit(rendered, (cx, y))
+
+            cx += rendered.get_width()
+
+            space = font.render(" ", True, text1)
+            surface.blit(space, (cx, y))
+            cx += space.get_width()
+
+    closeB = Button("IDEresources/textures/closeB.png", (1575,5), 1, 1)
+    minB = Button("IDEresources/textures/minB.png", (1545,5), 1, 1)
 
 
     running = True
@@ -59,7 +107,14 @@ def main():
 
         # -------== key buttons ==--------------------------------------------------------------------------------------------------------------
         for event in pg.event.get():
+            
+            if event.type == MOUSEWHEEL:
+                        scrolly -= event.y
+            if scrolly <= 0:
+                        scrolly = 0
+                        
             if event.type == pg.KEYDOWN:
+
                 if pg.key.name(event.key) == "space":
                     line = line + ' '
                 elif pg.key.name(event.key) == "tab":
@@ -83,10 +138,27 @@ def main():
                     pass
                 elif pg.key.name(event.key) == "right alt":
                     pass
-                elif pg.key.name(event.key) == "f1": #temporary save
+                elif pg.key.name(event.key) == "caps lock":
+                    if uppercase == True:
+                        uppercase = False
+                    else:
+                        uppercase = True
+                elif pg.key.name(event.key) == "f1": #(maybe) temporary save
                     save(code + [line])
                 elif pg.key.name(event.key) == "f2":
-                    pass
+                    loaded = load()
+
+                    if loaded:
+                        lines = loaded.splitlines()
+
+                        if lines:
+                            code = lines[:-1]
+                            line = lines[-1]
+                        else:
+                            code = []
+                            line = ""
+
+                        lookingatline = len(code) + 1
                 elif pg.key.name(event.key) == "f3":
                     pass
                 elif pg.key.name(event.key) == "f4":
@@ -117,11 +189,15 @@ def main():
                     line = ""
                     lookingatline += 1
                 else:
-                    line += pg.key.name(event.key)
+                    if uppercase:
+                        line += pg.key.name(event.key).upper()
+                    else:
+                        line += event.unicode
+                        
                 
-                print(line)
-                print(pg.key.name(event.key))
-                
+            print(lookingatline)
+            #print(pg.key.name(event.key))
+
 
 
         # -------== buttons ==--------------------------------------------------------------------------------------------------------------
@@ -136,28 +212,31 @@ def main():
 
         # -------== drawing ==--------------------------------------------------------------------------------------------------------------
         window.fill(bg)
-        pg.draw.rect(window, titleBar, [0, 0, 1200, 30])
-        pg.draw.rect(window, main, [0, 30, 1200, 60])
-        pg.draw.rect(window, margin, [0, 90, 45, 750])
+        pg.draw.rect(window, margin, [0, 90, 45, 930])
 
-        closeB.draw(window)  
-        minB.draw(window)      
+              
 
-        for i in range(27):
-            numbers = sideFont.render(str(i), False, textHighlight)
+        for i in range(33):
+            numbers = sideFont.render(str(1+i+scrolly), False, textHighlight)
             window.blit(numbers, (5, (i*25+100)))
         
         y = 95
         for line_text in code:
-            renderedlines = font.render(line_text, False, text1)
-            window.blit(renderedlines, (50, y))
+            drawcolorwords(window, font, line_text, 50, y-(scrolly*25))
             y += 25
             
-        text = font.render(line, False, textHighlight)
-        window.blit(text, (50, (lookingatline*25+70)))
+        line2 = str(line) + '|'
+        drawcolorwords(window, font, line2, 50, (lookingatline*25+70)-(scrolly*25))
+        
+        pg.draw.rect(window, titleBar, [0, 0, 1600, 30])
+        pg.draw.rect(window, main, [0, 30, 1600, 60])
+        
+        closeB.draw(window)  
+        minB.draw(window)
         
         pg.display.flip()
         
+
 
 
 
@@ -185,8 +264,24 @@ def save(code):
         for line in code:
             f.write(line + "\n")
         
-        
 
+
+def load():
+    root = tk.Tk()
+    root.withdraw()
+
+    filename = filedialog.askopenfilename(
+        title="Open File",
+        filetypes=[("All Files", "*.*")]
+    )
+
+    root.destroy()
+
+    if not filename:
+        return None
+
+    with open(filename, "r") as f:
+        return f.read()
 
 
 

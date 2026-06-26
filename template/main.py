@@ -211,20 +211,18 @@ def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there
     #pg.draw.circle(window, "blue", (px, py), 5)
 
     for ray in range(rayAmount): #amount of rays
-        rayangle = (pa - 45 + ray * 10) * M.pi / 180 # the number *ing the ray is the angle between each ray
+        rayangle = (pa - 45 + ray * 2.5) * M.pi / 180 # the number *ing the ray is the angle between each ray
 
         dx = M.sin(rayangle)
         dy = M.cos(rayangle)
 
         sx, sy = px, py
 
-        for move in range(rayDist): #the dist the ray travels
-            sx += dx 
-            sy += dy 
-
-            #pg.draw.circle(window, "red", (sx, sy), 2)
-
-            if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
+        rayend = (
+            px + dx * rayDist,
+            py + dy * rayDist
+        )
+        if intersect((px, py),rayend,(wx1, wy1), (wx2, wy2)):
                 return False #a wall should be there
 
 
@@ -242,7 +240,7 @@ def raycastCOL(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks for w
 
         sx, sy = px, py
 
-        for move in range(10): #the dist the ray travels
+        for move in range(15): #the dist the ray travels. AKA how fat you are
             sx += dx 
             sy += dy 
             #pg.draw.circle(window, "green", (sx, sy), 2)
