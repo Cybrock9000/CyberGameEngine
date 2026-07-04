@@ -14,7 +14,7 @@ import json
 
 
 
-def main():
+def main(script=[]):
     
     # -------== setting up ==--------------------------------------------------------------------------------------------------------------
     
@@ -28,7 +28,7 @@ def main():
     font = pg.font.SysFont('Consolas', 20)
     sideFont = pg.font.SysFont('bold Consolas', 20)
     
-    code = []
+    code = script
     line = ''
 
 
@@ -45,7 +45,7 @@ def main():
 
     # -------== colors ==--------------------------------------------------------------------------------------------------------------
 
-    pallet = pg.image.load((os.getcwd() + "/IDEresources/textures/p.png")) #thanks to the people on stack overflow for loading colors from a pic
+    pallet = pg.image.load((os.getcwd() + "/CyIDE/IDEresources/textures/p.png")) #thanks to the people on stack overflow for loading colors from a pic
     image_rect = pallet.get_rect()
     
     window.fill((0,0,0))
@@ -61,7 +61,8 @@ def main():
     text1 = screensurf.get_at((2,p))
     titleBar = screensurf.get_at((5,p))
     
-    with open(os.getcwd() + "/IDEresources/languages/python.json", "r") as py: #load programing languages
+    #right now its manual for this script \/ \/
+    with open(os.getcwd() + "/CyIDE/IDEresources/languages/engcyscript.json", "r") as py: #load programing languages ---------------------------------------------------------------- engcyscript
         specialwords = json.load(py)
         
         for keyword, data in specialwords.items():
@@ -98,8 +99,8 @@ def main():
             surface.blit(space, (cx, y))
             cx += space.get_width()
 
-    closeB = Button("IDEresources/textures/closeB.png", (1575,5), 1, 1)
-    minB = Button("IDEresources/textures/minB.png", (1545,5), 1, 1)
+    closeB = Button(os.getcwd() +"\CyIDE/IDEresources/textures/closeB.png", (1575,5), 1, 1)
+    minB = Button(os.getcwd() +"\CyIDE/IDEresources/textures/minB.png", (1545,5), 1, 1)
 
 
     running = True
@@ -123,7 +124,7 @@ def main():
                     if line == '':
                         if lookingatline != 1:
                             lookingatline -= 1
-                            line = code.pop()
+                            line = code.pop(lookingatline -1)
                     else:
                         line = line[:-1]
                 elif pg.key.name(event.key) == "left shift": #all these blank passes to prevent you doing = hleft shiftello
@@ -179,13 +180,28 @@ def main():
                     pass
                 elif pg.key.name(event.key) == "f12":
                     pass
+                
+                
+                elif event.key == pg.K_UP:
+                    if lookingatline != 0:
+                        lookingatline -= 1
+                        print('up')
+
+                elif event.key == pg.K_DOWN:
+                    print('donw')
+                    lookingatline += 1
+                    if len(code) <= (lookingatline - 1):
+                        code.insert(lookingatline-1,line)
+                        line = ""
+                    
+
                 elif pg.key.name(event.key) == "numlock":
                     pass
                 elif pg.key.name(event.key) == "escape": #quit
                     #running = False
                     pass
                 elif pg.key.name(event.key) == "return": #enter
-                    code.append(line)
+                    code.insert(lookingatline-1,line)
                     line = ""
                     lookingatline += 1
                 else:
@@ -225,7 +241,7 @@ def main():
             drawcolorwords(window, font, line_text, 50, y-(scrolly*25))
             y += 25
             
-        line2 = str(line) + '|'
+        line2 = str(line) + '<=-' #cursor -------------------------------------------------------
         drawcolorwords(window, font, line2, 50, (lookingatline*25+70)-(scrolly*25))
         
         pg.draw.rect(window, titleBar, [0, 0, 1600, 30])
@@ -290,6 +306,14 @@ if __name__ == "__main__":
     
     main()
     
+def Sload(path):
+    
+    with open(path, "r") as f:
+        return f.read().splitlines()
+
+def run(script):
+    S = Sload(script)
+    main(S)
 
 
 pg.quit()

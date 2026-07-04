@@ -21,8 +21,10 @@ import tkinter as tk
 import webbrowser
 import re
 import subprocess
+from multiprocessing import Process
 import importlib.util
 import array
+import CyIDE.CYeditor as CyIDE
 
 
 # -------== colors ==--------------------------------------------------------------------------------------------------------------
@@ -110,7 +112,7 @@ def main(): #looking back on it now, i could have used classes instead
     scripts = [] #scripts, font and text had to be loaded early for the load scripts
     font = pg.font.SysFont('Comic Sans MS', 15)
     text = {}
-    loadScripts(name,font,text)
+    Sscripts = loadScripts(name,font,text)
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
     
@@ -161,6 +163,7 @@ def main(): #looking back on it now, i could have used classes instead
     #other
 
     scrolly = 0
+    actualScroll = 0
     
     # -------== images ==--------------------------------------------------------------------------------------------------------------
     
@@ -259,15 +262,16 @@ def main(): #looking back on it now, i could have used classes instead
         # -------== controls and keys and buttons ==--------------------------------------------------------------------------------------------------------------
         
         for event in pg.event.get():
-            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE
-            ):
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 runningMain = False
                 
             if event.type == MOUSEWHEEL:
                 if mouseINV:
                     scrolly -= event.y*80
+                    actualScroll -= event.y
                 else:
                     scrolly += event.y*80
+                    actualScroll += event.y
                 if scrolly >= 0:
                     scrolly = 0
         
@@ -616,17 +620,20 @@ def main(): #looking back on it now, i could have used classes instead
              
              buttonDelay17 = False
              
-        if PlayerSB.is_pressed() and buttonDelay18 == False:
+        '''if PlayerSB.is_pressed() and buttonDelay18 == False:
             
             clickA(click)
             path = os.getcwd()
-            subprocess.Popen(["notepad.exe", f"{path}\{name}\player.py"])
+            #subprocess.Popen(["notepad.exe", f"{path}\{name}\player.py"])
+            Spath = f'{path}\{name}\player.py'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
             buttonDelay18 = True
             
         elif PlayerSB.is_pressed() and buttonDelay18 == True:
             pass
         else: 
-             buttonDelay18 = False
+             buttonDelay18 = False'''
              
         if wminusB.is_pressed() and buttonDelay19 == False:
             
@@ -689,6 +696,46 @@ def main(): #looking back on it now, i could have used classes instead
             pass
         else: 
              buttonDelay22 = False
+             
+
+
+
+
+
+
+        #--==Blank Script Buttons==--
+
+        if bsb1.is_pressed() and buttonDelay23 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll]}' #open the file that is at the button
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay23 = True
+            
+        elif bsb1.is_pressed() and buttonDelay23 == True:
+            pass
+        else: 
+             buttonDelay23 = False
+             
+             
+        if bsb2.is_pressed() and buttonDelay24 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+1]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay24 = True
+            
+        elif bsb2.is_pressed() and buttonDelay24 == True:
+            pass
+        else: 
+             buttonDelay24 = False
+             
+
+
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
@@ -826,10 +873,14 @@ def loadScripts(name,font,text):
     global scripts
     path = os.getcwd()
     scripts = os.listdir((f'{path}/{name}/scripts'))
+    Slist = []
     '''print((f'{path}/{name}/scripts'))
     print(scripts)'''
     for script in scripts:
         text[script] = font.render(script, False, (0, 0, 0))
+        Slist.append(script)
+        
+    return Slist
 
 
 def scriptsPannel(text, screen, scrolly):

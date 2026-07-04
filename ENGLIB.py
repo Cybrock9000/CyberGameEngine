@@ -36,7 +36,7 @@ def savemap(name,maplst,wallamount):
         file.write(content)
         
 def updatePlayerPos(name,pos):
-    fileS = f"{name}/player.py" #change the players position
+    fileS = f"{name}/main.py" #change the players position
 
     with open(fileS, "r") as file:
         content = file.read()
@@ -59,7 +59,7 @@ def updateDarkness(name,val):
     with open(fileS, "w") as file:
         file.write(content)
 
-def scriptCompliler(script):
+'''def scriptCompliler(script): #might use this
     if script.endswith('.py'):
         pass
 
@@ -78,7 +78,7 @@ def scriptCompliler(script):
 
                 if scriptlist[i] == 'Type':
                     if i + 1 < len(scriptlist) and scriptlist[i + 1] == 'NPC':
-                        f.write('test')
+                        f.write('test')'''
             
 
 

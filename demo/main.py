@@ -1,4 +1,5 @@
 import pygame as pg
+from pygame import gfxdraw
 from settings import *
 from player import *
 import time
@@ -6,6 +7,7 @@ import math as M
 from map import*
 from os import listdir
 from CybrocksLibraryG import *
+import os
 
 
 def main():
@@ -13,33 +15,45 @@ def main():
     # inits
 
     pg.init()
+    pg.mixer.init()
+    
+    with open(f'{NAME}/scripts/player.cy', "r") as f:
+        playerS = f.read().splitlines()
 
     window = pg.display.set_mode(RES)
 
     pg.mouse.set_visible(False)
     pg.event.set_grab(True)
 
-    icon = pg.image.load('icon.ico').convert_alpha()
+    icon = pg.image.load(os.getcwd() + '\icon.ico').convert_alpha()
     pg.display.set_icon(icon)
     
     clock = pg.time.Clock()
     
+    bgm = pg.mixer.Sound(os.getcwd() + '/resources/music/bg.wav')
+    channel = bgm.play(-1)
 
     sky = BetterImage(f"{NAME}/resources/textures/sky.webp", (0, 0), 2, 2)
     sky2 = BetterImage(f"{NAME}/resources/textures/sky.webp", (0, 0), 2, 2)
+    hand = BetterImage(f"{NAME}/resources/textures/w/handEmpty.png", (RES[0]/4+15, RES[1]/4), 5, 5)
     if EHUD == True:
         hud = BetterImage(f"{NAME}/resources/textures/hud.png", (0, 0), 2, 2)
     if DARK == True:
         vig = BetterImage(f"{NAME}/resources/textures/Vignette.png", (0, 0), 2, 2)
 
-    
+    playerStartPos = (0, 0, 20)
     px,py,pz= playerStartPos
+    
     
     jumping = False
     i = -20
     g = 0
     col = False
     grounded = True
+    handbob = 0
+    bobDir = 1
+    
+    SPEED, HEALTH, CanRun, CanCrouch = loadPlayerScripts(playerS)
     
     dx = 0
     dy = 0
@@ -47,6 +61,10 @@ def main():
     pa = 0
     pl = 0
     newwalldata = []
+    
+    image = pg.image.load(f"{NAME}/resources/textures/walls/bricks.png").convert_alpha()
+    image.set_colorkey((255,0,255))
+    print(image.get_colorkey())
 
     running = True
     while running:
@@ -63,11 +81,11 @@ def main():
         mx, my = pg.mouse.get_pos()
         keys = pg.key.get_pressed()
         rspeed = 200
-        if keys[pg.K_LSHIFT] and not crouch:
+        if keys[pg.K_LSHIFT] and not crouch and CanRun:
             crouch = False
             sprinting = True
             speed = SPEED * dt *2
-        elif keys[pg.K_LCTRL] and not sprinting:
+        elif keys[pg.K_LCTRL] and not sprinting and CanCrouch:
             crouch = True
             sprinting = False
             speed = SPEED * dt /2
@@ -93,26 +111,40 @@ def main():
 
         if keys[pg.K_DOWN]:
             pl -= rspeed * dt'''
-            
         
-
+        if handbob >= 10:
+            bobDir = -1
+        if handbob <= -10:
+            bobDir = 1
+        
         oldpx = px
         oldpy = py
         if keys[pg.K_w]:
             px += dx * speed
             py += dy * speed
+            handbob += bobDir
+            hand.move((RES[0]/4+15, RES[1]/4+handbob))
 
         if keys[pg.K_s]:
             px -= dx * speed
             py -= dy * speed
+            handbob += bobDir
+            hand.move((RES[0]/4+15, RES[1]/4+handbob))
 
         if keys[pg.K_d]:
             px += dy * speed
             py -= dx * speed
+            handbob += bobDir
+            hand.move((RES[0]/4+15, RES[1]/4+handbob))
 
         if keys[pg.K_a]:
             px -= dy * speed
             py += dx * speed
+            handbob += bobDir
+            hand.move((RES[0]/4+15, RES[1]/4+handbob))
+            
+        print(bobDir)
+        print(handbob)
 
             
 
@@ -183,16 +215,20 @@ def main():
             sky2.move((-(pa*5.20)+1875,-631+pl*30))
         sky.draw(window)
         sky2.draw(window)
-        col = draw(window, px, py, pz, pa, pl, col) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        col = draw(window,px,py,pz,pa,pl,col,image) #janky way on simple collision by using the draw method and raycaster, but it works for now
         if col:
             px = oldpx
             py = oldpy
+            
+
+        hand.draw(window)   
             
         if DARK == True:
             vig.draw(window)
 
         if EHUD == True:
-            hud.draw(window)            
+            hud.draw(window)      
+           
 
         pg.display.flip()
         
@@ -208,7 +244,7 @@ def intersect(A,B,C,D):
     return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
 def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there is a wall the player can see
-    pg.draw.circle(window, "blue", (px, py), 5)
+    #pg.draw.circle(window, "blue", (px, py), 5)
 
     for ray in range(rayAmount): #amount of rays
         
@@ -232,8 +268,6 @@ def raycast(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks if there
 
     return True #no wall :(
 
-def intersect(A,B,C,D):
-    return ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)
 
 def raycastCOL(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks for wall colision
     for ray in range(4): #amount of rays
@@ -252,10 +286,10 @@ def raycastCOL(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks for w
 
             if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
                 return True #a wall is there
-
-
+            
     return False #no wall
     
+
 def reorderwalls(px, py):
     wall_distances = []
 
@@ -275,7 +309,7 @@ def reorderwalls(px, py):
     return [wall for d, wall in wall_distances]
         
 
-def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
+def draw(window,px,py,pz,pa,pl,col,image):    #drawing walls and such
     col = False
     newwalldata = reorderwalls(px, py)
     for walls in range(len(newwalldata)):
@@ -355,6 +389,7 @@ def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
                 c2 = c
         else:
             c2 = c
+        #pg.gfxdraw.textured_polygon(window,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])),image,0,0)
         pg.draw.polygon(window,c2,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])))
     return col
         
@@ -366,6 +401,39 @@ def dist(x1,y1,x2,y2):
 
 def midp(x1,y1,x2,y2):
     return((x1 + x2) / 2, (y1 + y2) / 2)
+
+def loadPlayerScripts(lines):
+    SPEED = 100 #default speed value
+
+    for line in lines:
+        line = line.strip()
+
+        if not line or line.startswith("*"):
+            continue
+
+        if line == "Done":
+            break
+
+        parts = line.split(maxsplit=1)
+
+        key = parts[0]
+        value = parts[1] if len(parts) > 1 else ""
+
+        if key == "SHealth":
+            HEALTH = int(value)
+
+        elif key == "SSpeed":
+            SPEED = float(value)
+
+        elif key == "SCanRun":
+            CanRun = value.startswith("T") #if its T then its true
+
+        elif key == "SCanCrouch":
+            CanCrouch = value.startswith("T")
+            
+    return SPEED, HEALTH, CanRun, CanCrouch
+
+    
 
 if __name__ == "__main__":
     main()
