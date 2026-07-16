@@ -8,6 +8,8 @@ from map import*
 from os import listdir
 from CybrocksLibraryG import *
 import os
+from npc_handler import *
+from npc import *
 
 
 def main():
@@ -17,29 +19,34 @@ def main():
     pg.init()
     pg.mixer.init()
     
-    with open(f'{NAME}/scripts/player.cy', "r") as f:
+    NpcHandler = npcHandler()
+    
+    with open(os.curdir +'/scripts/player.cy', "r") as f:
         playerS = f.read().splitlines()
+        
+    with open(os.curdir +'/objects/npc.cy', "r") as f:
+        npcS = f.read().splitlines()
 
     window = pg.display.set_mode(RES)
 
     pg.mouse.set_visible(False)
     pg.event.set_grab(True)
 
-    icon = pg.image.load(os.getcwd() + '\icon.ico').convert_alpha()
+    icon = pg.image.load(os.curdir +'\icon.ico').convert_alpha()
     pg.display.set_icon(icon)
     
     clock = pg.time.Clock()
     
-    bgm = pg.mixer.Sound(os.getcwd() + '/resources/music/bg.wav')
+    bgm = pg.mixer.Sound(os.curdir +'/resources/music/bg.wav')
     channel = bgm.play(-1)
 
-    sky = BetterImage(f"{NAME}/resources/textures/sky.webp", (0, 0), 2, 2)
-    sky2 = BetterImage(f"{NAME}/resources/textures/sky.webp", (0, 0), 2, 2)
-    hand = BetterImage(f"{NAME}/resources/textures/w/handEmpty.png", (RES[0]/4+15, RES[1]/4), 5, 5)
+    sky = BetterImage(os.curdir +"/resources/textures/sky.webp", (0, 0), 2, 2)
+    sky2 = BetterImage(os.curdir +"/resources/textures/sky.webp", (0, 0), 2, 2)
+    hand = BetterImage(os.curdir +"/resources/textures/w/handEmpty.png", (RES[0]/4+15, RES[1]/4), 5, 5)
     if EHUD == True:
-        hud = BetterImage(f"{NAME}/resources/textures/hud.png", (0, 0), 2, 2)
+        hud = BetterImage(os.curdir +"/resources/textures/hud.png", (0, 0), 2, 2)
     if DARK == True:
-        vig = BetterImage(f"{NAME}/resources/textures/Vignette.png", (0, 0), 2, 2)
+        vig = BetterImage(os.curdir +"/resources/textures/Vignette.png", (0, 0), 2, 2)
 
     playerStartPos = (0, 0, 20)
     px,py,pz= playerStartPos
@@ -54,6 +61,7 @@ def main():
     bobDir = 1
     
     SPEED, HEALTH, CanRun, CanCrouch = loadPlayerScripts(playerS)
+    loadObjectScripts(npcS,NpcHandler)
     
     dx = 0
     dy = 0
@@ -61,10 +69,7 @@ def main():
     pa = 0
     pl = 0
     newwalldata = []
-    
-    image = pg.image.load(f"{NAME}/resources/textures/walls/bricks.png").convert_alpha()
-    image.set_colorkey((255,0,255))
-    print(image.get_colorkey())
+
 
     running = True
     while running:
@@ -143,9 +148,6 @@ def main():
             handbob += bobDir
             hand.move((RES[0]/4+15, RES[1]/4+handbob))
             
-        print(bobDir)
-        print(handbob)
-
             
 
         #print(grounded)
@@ -215,7 +217,8 @@ def main():
             sky2.move((-(pa*5.20)+1875,-631+pl*30))
         sky.draw(window)
         sky2.draw(window)
-        col = draw(window,px,py,pz,pa,pl,col,image) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        col = draw(window,px,py,pz,pa,pl,col,NpcHandler) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        NpcHandler.update((px,py),pa,pl,window)
         if col:
             px = oldpx
             py = oldpy
@@ -309,9 +312,20 @@ def reorderwalls(px, py):
     return [wall for d, wall in wall_distances]
         
 
-def draw(window,px,py,pz,pa,pl,col,image):    #drawing walls and such
+def npcraycast(handler, px, py, newwalldata):
+    newwalldata = reorderwalls(px, py)
+
+    for npc in handler.npc_list:
+        npc.wall = True
+
+    for x1, y1, x2, y2, c in newwalldata:
+        handler.raycast(px, py, x1, y1, x2, y2)
+
+def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
     col = False
     newwalldata = reorderwalls(px, py)
+    npcraycast(NpcHandler,px,py,newwalldata)
+    
     for walls in range(len(newwalldata)):
         
         radcos = M.cos(pa/180*M.pi)/2
@@ -327,6 +341,7 @@ def draw(window,px,py,pz,pa,pl,col,image):    #drawing walls and such
 
         if raycast(window, px, py, pz, pa, x1, y1, x2, y2):
             continue
+        
         #print(col)
         #pg.draw.line(window,c,(x1,y1),(x2,y2),2)
         
@@ -391,6 +406,7 @@ def draw(window,px,py,pz,pa,pl,col,image):    #drawing walls and such
             c2 = c
         #pg.gfxdraw.textured_polygon(window,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])),image,0,0)
         pg.draw.polygon(window,c2,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])))
+        
     return col
         
 
@@ -433,6 +449,29 @@ def loadPlayerScripts(lines):
             
     return SPEED, HEALTH, CanRun, CanCrouch
 
+
+
+def loadObjectScripts(lines,NpcHandler):
+
+    for line in lines:
+        line = line.strip()
+
+        if not line or line.startswith("*"):
+            continue
+
+        if line == "Done":
+            break
+
+        parts = line.split(maxsplit=1)
+
+        key = parts[0]
+        value = parts[1] if len(parts) > 1 else ""
+
+        if key == "NPCList":
+            startlist = value
+            for npc in startlist:
+                NpcHandler.npc_list.append(NPC(path='resources/textures/test.png', pos=(5,5), scale=5, shift=0, script=''))
+                
     
 
 if __name__ == "__main__":

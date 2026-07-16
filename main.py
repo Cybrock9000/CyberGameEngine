@@ -1,3 +1,4 @@
+#2026 Cy
 
 #im autualy going to try to comment as much as posible for this project unlike my other projects (horizon vibe)
 
@@ -25,6 +26,7 @@ from multiprocessing import Process
 import importlib.util
 import array
 import CyIDE.CYeditor as CyIDE
+import sys
 
 
 # -------== colors ==--------------------------------------------------------------------------------------------------------------
@@ -110,9 +112,11 @@ def main(): #looking back on it now, i could have used classes instead
     smodule.loader.exec_module(settingsFile)
 
     scripts = [] #scripts, font and text had to be loaded early for the load scripts
-    font = pg.font.SysFont('Comic Sans MS', 15)
+    font = pg.font.SysFont('Bold Comic Sans MS', 25)
     text = {}
+    Otext = {}
     Sscripts = loadScripts(name,font,text)
+    Sobjects = loadObjects(name,font,Otext)
     
     # -------== vars ==--------------------------------------------------------------------------------------------------------------
     
@@ -274,6 +278,8 @@ def main(): #looking back on it now, i could have used classes instead
                     actualScroll += event.y
                 if scrolly >= 0:
                     scrolly = 0
+                if actualScroll >= 0:
+                    actualScroll = 0
         
 
 
@@ -306,7 +312,9 @@ def main(): #looking back on it now, i could have used classes instead
         if testB.is_pressed() and buttonDelay3 == False:
             
             clickA(click)
-            subprocess.run(["python", f"{name}/main.py"])
+            subprocess.run([sys.executable, "main.py"],cwd=os.path.join(os.getcwd(), name))
+            print(os.path.join(os.getcwd(), name))
+            #subprocess.run(["python", f"{name}/main.py"])
             buttonDelay3 = True
             
         elif testB.is_pressed() and buttonDelay3 == True:
@@ -735,6 +743,94 @@ def main(): #looking back on it now, i could have used classes instead
              buttonDelay24 = False
              
 
+        if bsb3.is_pressed() and buttonDelay25 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+2]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay25 = True
+            
+        elif bsb3.is_pressed() and buttonDelay25 == True:
+            pass
+        else: 
+             buttonDelay25 = False
+             
+
+        if bsb4.is_pressed() and buttonDelay26 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+3]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay26 = True
+            
+        elif bsb4.is_pressed() and buttonDelay26 == True:
+            pass
+        else: 
+             buttonDelay26 = False
+             
+
+        if bsb5.is_pressed() and buttonDelay27 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+4]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay27 = True
+            
+        elif bsb5.is_pressed() and buttonDelay27 == True:
+            pass
+        else: 
+             buttonDelay27 = False
+             
+
+        if bsb6.is_pressed() and buttonDelay28 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+5]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay28 = True
+            
+        elif bsb6.is_pressed() and buttonDelay28 == True:
+            pass
+        else: 
+             buttonDelay28 = False
+             
+
+        if bsb7.is_pressed() and buttonDelay29 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+6]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay29 = True
+            
+        elif bsb7.is_pressed() and buttonDelay29 == True:
+            pass
+        else: 
+             buttonDelay29 = False
+             
+
+        if bsb8.is_pressed() and buttonDelay30 == False:
+            
+            clickA(click)
+            Spath = f'{name}/scripts/{Sscripts[actualScroll+7]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay30 = True
+            
+        elif bsb8.is_pressed() and buttonDelay30 == True:
+            pass
+        else: 
+             buttonDelay30 = False
 
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
@@ -779,7 +875,7 @@ def main(): #looking back on it now, i could have used classes instead
         bsb7.draw(window)
         bsb8.draw(window)
 
-        scriptsPannel(text,window,scrolly)
+        scriptsPannel(text,window,(actualScroll*80))
         
         bob1.draw(window)
         bob2.draw(window)
@@ -789,6 +885,8 @@ def main(): #looking back on it now, i could have used classes instead
         bob6.draw(window)
         bob7.draw(window)
         bob8.draw(window)
+        
+        ObjectsPannel(Otext,window,(actualScroll*80))
         
         #sidebar buttons
         creditsB.draw(window)
@@ -870,7 +968,7 @@ def mapgrid(window,name, x, y, scale, grid, wallamount): #this is how the map is
     
 # -------== Pannels ==--------------------------------------------------------------------------------------------------------------
 def loadScripts(name,font,text):
-    global scripts
+    
     path = os.getcwd()
     scripts = os.listdir((f'{path}/{name}/scripts'))
     Slist = []
@@ -892,6 +990,30 @@ def scriptsPannel(text, screen, scrolly):
             pass
         else:
             screen.blit(text[i], (760, ypos))
+            
+
+def loadObjects(name,font,Otext):
+    path = os.getcwd()
+    Objects = os.listdir((f'{path}/{name}/objects'))
+    Olist = []
+    '''print((f'{path}/{name}/scripts'))
+    print(scripts)'''
+    for obj in Objects:
+        Otext[obj] = font.render(obj, False, (0, 0, 0))
+        Olist.append(obj)
+        
+    return Olist
+
+
+def ObjectsPannel(Otext, screen, scrolly):
+    e = 0
+    for i in Otext:
+        e += 1
+        ypos = (80 * e) + scrolly + 60
+        if ypos <= 120 or ypos >= 750: 
+            pass
+        else:
+            screen.blit(Otext[i], (480, ypos))
             
         
 def clickA(click): #me being lazy

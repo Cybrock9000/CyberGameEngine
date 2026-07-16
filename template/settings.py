@@ -6,10 +6,10 @@ RES = (1200, 800)
 FPS = 60
 FOV = 1000
 
-rayDist = 300 #raycast dist and render dist
-rayAmount = 10 #amount of rays, the more = laggier but accurate, the less = fast but could miss a lot of walls
-SHADOW_DIST = rayDist / 15
-DARK = True
+rayDist = 500 #raycast dist and render dist
+rayAmount = 30 #amount of rays, the more = laggier but accurate, the less = fast but could miss a lot of walls
+SHADOW_DIST = rayDist / 30
+DARK = 1
 
 SKY_COLOR = (0,0,0)
 
