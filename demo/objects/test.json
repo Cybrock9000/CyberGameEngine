@@ -1,0 +1,9 @@
+{
+  "path": "resources/textures/test.png",
+  "pos": [50, 0],
+  "scale": 1,
+  "shift": 0,
+  "pathfinding": "F",
+  "CanMove": "T",
+  "speed": 0.5
+}

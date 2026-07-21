@@ -8,6 +8,8 @@ from map import*
 from os import listdir
 from CybrocksLibraryG import *
 import os
+from npc_handler import *
+from npc import *
 
 
 def main():
@@ -17,8 +19,13 @@ def main():
     pg.init()
     pg.mixer.init()
     
+    NpcHandler = npcHandler()
+    
     with open(os.curdir +'/scripts/player.cy', "r") as f:
         playerS = f.read().splitlines()
+        
+    with open(os.curdir +'/objects/npc.cy', "r") as f:
+        npcS = f.read().splitlines()
 
     window = pg.display.set_mode(RES)
 
@@ -54,6 +61,7 @@ def main():
     bobDir = 1
     
     SPEED, HEALTH, CanRun, CanCrouch = loadPlayerScripts(playerS)
+    loadObjectScripts(npcS,NpcHandler)
     
     dx = 0
     dy = 0
@@ -140,9 +148,6 @@ def main():
             handbob += bobDir
             hand.move((RES[0]/4+15, RES[1]/4+handbob))
             
-        print(bobDir)
-        print(handbob)
-
             
 
         #print(grounded)
@@ -205,14 +210,15 @@ def main():
         pg.display.set_caption(f'{NAME}   FPS: {clock.get_fps():.1f}')
         window.fill('black')
         if -(pa*5.20) >= 0:
-            sky.move((-(pa*5.20),-631+pl*30))
-            sky2.move((-(pa*5.20)-1875,-631+pl*30))
+            sky.move((-(pa*5.20),-700+pl*30))
+            sky2.move((-(pa*5.20)-1875,-700+pl*30))
         else:
-            sky.move((-(pa*5.20),-631+pl*30))
-            sky2.move((-(pa*5.20)+1875,-631+pl*30))
+            sky.move((-(pa*5.20),-700+pl*30))
+            sky2.move((-(pa*5.20)+1875,-700+pl*30))
         sky.draw(window)
         sky2.draw(window)
-        col = draw(window,px,py,pz,pa,pl,col) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        col = draw(window,px,py,pz,pa,pl,col,NpcHandler) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        NpcHandler.update((px,py),pa,pl,window,pz)
         if col:
             px = oldpx
             py = oldpy
@@ -306,9 +312,20 @@ def reorderwalls(px, py):
     return [wall for d, wall in wall_distances]
         
 
-def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
+def npcraycast(handler, px, py, newwalldata):
+    newwalldata = reorderwalls(px, py)
+
+    for npc in handler.npc_list:
+        npc.wall = True #set it first (totaly didnt have this effect me at first)
+
+    for x1, y1, x2, y2, c in newwalldata:
+        handler.raycast(px, py, x1, y1, x2, y2)
+
+def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
     col = False
     newwalldata = reorderwalls(px, py)
+    npcraycast(NpcHandler,px,py,newwalldata)
+    
     for walls in range(len(newwalldata)):
         
         radcos = M.cos(pa/180*M.pi)/2
@@ -324,6 +341,7 @@ def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
 
         if raycast(window, px, py, pz, pa, x1, y1, x2, y2):
             continue
+        
         #print(col)
         #pg.draw.line(window,c,(x1,y1),(x2,y2),2)
         
@@ -388,6 +406,7 @@ def draw(window,px,py,pz,pa,pl,col):    #drawing walls and such
             c2 = c
         #pg.gfxdraw.textured_polygon(window,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])),image,0,0)
         pg.draw.polygon(window,c2,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])))
+        
     return col
         
 
@@ -430,6 +449,27 @@ def loadPlayerScripts(lines):
             
     return SPEED, HEALTH, CanRun, CanCrouch
 
+
+
+def loadObjectScripts(lines,NpcHandler):
+
+    for line in lines:
+        line = line.strip()
+
+        if not line or line.startswith("*"):
+            continue
+
+        if line == "Done":
+            break
+
+        parts = line.split(maxsplit=1)
+
+        key = parts[0]
+        value = parts[1] if len(parts) > 1 else ""
+
+        if line.startswith("NPC"):
+            NpcHandler.npc_list.append(NPC(script=value))
+                
     
 
 if __name__ == "__main__":

@@ -209,16 +209,18 @@ def main():
         
         pg.display.set_caption(f'{NAME}   FPS: {clock.get_fps():.1f}')
         window.fill('black')
-        if -(pa*5.20) >= 0:
-            sky.move((-(pa*5.20),-631+pl*30))
-            sky2.move((-(pa*5.20)-1875,-631+pl*30))
+        skyrot=5.2
+        if -(pa*skyrot) >= 0:
+            sky.move((-(pa*skyrot),-631+pl*30))
+            sky2.move((-(pa*skyrot)-1875,-631+pl*30))
         else:
-            sky.move((-(pa*5.20),-631+pl*30))
-            sky2.move((-(pa*5.20)+1875,-631+pl*30))
+            sky.move((-(pa*skyrot),-631+pl*30))
+            sky2.move((-(pa*skyrot)+1875,-631+pl*30))
         sky.draw(window)
         sky2.draw(window)
+        drawFloor(window,px,py,pz,pa,pl)
         col = draw(window,px,py,pz,pa,pl,col,NpcHandler) #janky way on simple collision by using the draw method and raycaster, but it works for now
-        NpcHandler.update((px,py),pa,pl,window)
+        NpcHandler.update((px,py),pa,pl,window,pz)
         if col:
             px = oldpx
             py = oldpy
@@ -311,25 +313,87 @@ def reorderwalls(px, py):
 
     return [wall for d, wall in wall_distances]
         
-
 def npcraycast(handler, px, py, newwalldata):
     newwalldata = reorderwalls(px, py)
 
     for npc in handler.npc_list:
-        npc.wall = True
+        npc.wall = True #set it first (totaly didnt have this effect me at first)
 
     for x1, y1, x2, y2, c in newwalldata:
         handler.raycast(px, py, x1, y1, x2, y2)
+
+
+
+
+
+def drawFloor(window, px, py, pz, pa, pl):
+    angle = pa/180*M.pi
+    radcos = M.cos(angle)/2
+    radsin = M.sin(angle)/2
+
+    near = 0.1
+    draw = pg.draw.polygon
+
+    for i in range(len(floorC)):
+        screen_points = []
+
+        #corners = [floorTL[i],floorTR[i],floorBR[i],floorBL[i]]
+        tl = floorTL[i]
+        tr = floorTR[i]
+        br = floorBR[i]
+        bl = floorBL[i]
+        color = floorC[i]
+
+        for wx, wy in (tl,tr,br,bl):
+
+            x = wx - px
+            y = wy - py
+
+            rx = x * radcos - y * radsin
+            rz = y * radcos + x * radsin
+
+            if rz < near:
+                rz = near
+
+            rz_screen = 40-pz + ((pl * rz) / 32)
+
+            inv = FOV / rz
+            sx = rx * inv + 600
+            sy = rz_screen * inv + 400
+
+            screen_points.append((sx, sy))
+            
+        fx = (tl[0] + br [0]) / 2
+        fy = (tl[1] + br [1]) / 2
+        d = dist(px, py, fx, fy)
+        if d > rayDist:
+            continue
+        
+        if DARK == True:
+
+
+                    d = dist(px, py, fx, fy)
+                    d = max(1, d)
+                    c2 = (min(color[0], int(color[0] / d * SHADOW_DIST + 1)),min(color[1], int(color[1] / d * SHADOW_DIST + 1)),min(color[2], int(color[2] / d * SHADOW_DIST + 1)))
+        else:
+                    c2 = color
+        draw(window, c2, screen_points)
+
+
+
 
 def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
     col = False
     newwalldata = reorderwalls(px, py)
     npcraycast(NpcHandler,px,py,newwalldata)
+    draw = pg.draw.polygon
     
     for walls in range(len(newwalldata)):
         
         radcos = M.cos(pa/180*M.pi)/2
         radsin = M.sin(pa/180*M.pi)/2
+        #radcos = M.cos(M.radians(pa))
+        #radsin = M.sin(M.radians(pa))
 
         x1, y1, x2, y2, c = newwalldata[walls] # wall cords and color
         
@@ -394,18 +458,21 @@ def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
         if wallx[1]>0 and wallx[1]<1200 and wally[1]>0 and wally[1]<800:
             pg.draw.circle(window,'red',(wallx[1],wally[1]),3)'''
             
+        mx = (x1 + x2) / 2
+        my = (y1 + y2) / 2
+        d = dist(px, py, mx, my)
+        if d > rayDist:
+            continue
+        
         if DARK == True:
-            mx = (x1 + x2) / 2
-            my = (y1 + y2) / 2
+            
 
             d = max(1, dist(px, py, mx, my))
-            c2 = int((c[0] / (d))*SHADOW_DIST+1),int((c[1] / (d))*SHADOW_DIST+1),int((c[2] / (d))*SHADOW_DIST+1)
-            if c2 >= c:
-                c2 = c
+            c2 = (min(c[0], int(c[0] / d * SHADOW_DIST + 1)),min(c[1], int(c[1] / d * SHADOW_DIST + 1)),min(c[2], int(c[2] / d * SHADOW_DIST + 1)))
         else:
             c2 = c
         #pg.gfxdraw.textured_polygon(window,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])),image,0,0)
-        pg.draw.polygon(window,c2,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])))
+        draw(window,c2,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])))
         
     return col
         
@@ -467,10 +534,8 @@ def loadObjectScripts(lines,NpcHandler):
         key = parts[0]
         value = parts[1] if len(parts) > 1 else ""
 
-        if key == "NPCList":
-            startlist = value
-            for npc in startlist:
-                NpcHandler.npc_list.append(NPC(path='resources/textures/test.png', pos=(5,5), scale=5, shift=0, script=''))
+        if line.startswith("NPC"):
+            NpcHandler.npc_list.append(NPC(script=value))
                 
     
 

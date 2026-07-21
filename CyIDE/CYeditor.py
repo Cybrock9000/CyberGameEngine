@@ -11,10 +11,11 @@ from tkinter import filedialog
 import sys
 from CybrocksLibrary import *
 import json
+from pathlib import Path
 
 
 
-def main(script=[]):
+def main(script=[],SfilePath=''):
     
     # -------== setting up ==--------------------------------------------------------------------------------------------------------------
     
@@ -145,7 +146,7 @@ def main(script=[]):
                     else:
                         uppercase = True
                 elif pg.key.name(event.key) == "f1": #(maybe) temporary save
-                    save(code + [line])
+                    save(code + [line],SfilePath)
                 elif pg.key.name(event.key) == "f2":
                     loaded = load()
 
@@ -161,11 +162,26 @@ def main(script=[]):
 
                         lookingatline = len(code) + 1
                 elif pg.key.name(event.key) == "f3":
-                    pass
+                    with open(os.getcwd() + "/CyIDE/IDEresources/languages/json.json", "r") as py:
+                        specialwords = json.load(py)
+                    
+                        for keyword, data in specialwords.items():
+                            palette_index = data[0]
+                            data[0] = screensurf.get_at((palette_index, p))
                 elif pg.key.name(event.key) == "f4":
-                    pass
+                    with open(os.getcwd() + "/CyIDE/IDEresources/languages/python.json", "r") as py:
+                        specialwords = json.load(py)
+                    
+                        for keyword, data in specialwords.items():
+                            palette_index = data[0]
+                            data[0] = screensurf.get_at((palette_index, p))
                 elif pg.key.name(event.key) == "f5":
-                    pass
+                    with open(os.getcwd() + "/CyIDE/IDEresources/languages/engcyscript.json", "r") as py:
+                        specialwords = json.load(py)
+                    
+                        for keyword, data in specialwords.items():
+                            palette_index = data[0]
+                            data[0] = screensurf.get_at((palette_index, p))
                 elif pg.key.name(event.key) == "f6":
                     pass
                 elif pg.key.name(event.key) == "f7":
@@ -256,8 +272,8 @@ def main(script=[]):
 
 
 
-def save(code):
-    root = tk.Tk()
+def save(code,SfilePath=''):
+    '''root = tk.Tk()
     root.title("Name and file type. (example = file.txt)")
 
     name = ""
@@ -275,8 +291,8 @@ def save(code):
     submitButton = tk.Button(root, text="OK", command=submit)
     submitButton.grid(row=2, column=0, columnspan=2)
 
-    root.mainloop()
-    with open(name, "w") as f:
+    root.mainloop()'''
+    with open(SfilePath, "w") as f:
         for line in code:
             f.write(line + "\n")
         
@@ -313,7 +329,8 @@ def Sload(path):
 
 def run(script):
     S = Sload(script)
-    main(S)
+    SfilePath = script
+    main(S,SfilePath)
 
 
 pg.quit()

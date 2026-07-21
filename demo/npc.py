@@ -3,21 +3,44 @@ from CybrocksLibraryG import *
 import os
 import math as M
 from settings import *
+import json
 
 
 class NPC:
-    def __init__(self, path='resources/textures/test.png', pos=(0,0), scale=1, shift=0, script=''):
-        self.x,self.y = pos
-        self.image = BetterImage(path,(0,0),scale,scale)
-        self.script = script
+    def __init__(self, script=''):
+        with open(os.path.join(os.curdir, script), "r") as f:
+            data = json.load(f)
+            
+        self.x,self.y = data['pos']
+        self.CanMove = data['CanMove']
+        self.speed = data['speed']
+        self.pathfinding = data['pathfinding']
+        self.image = BetterImage(data['path'],(0,0),data['scale'],data['scale'])
         self.dx, self.dy, self.screen_x = 0,0,0
         self.wall = True
     
 
-    def update(self,playerpos,A,pL,screen):
-        self.draw(playerpos,A,pL,screen)
+    def update(self,playerpos,A,pL,screen,pz):
+        self.draw(playerpos,A,pL,screen,pz)
+        self.move(playerpos)
+        
+
+    def move(self,playerpos):
+        if self.CanMove == 'T':
+            if self.pathfinding == 'T':
+                pass
+            else:
+                if playerpos[0] >= self.x:
+                    self.x += self.speed
+                if playerpos[0] <= self.x:
+                    self.x -= self.speed
+                    
+                if playerpos[1] >= self.y:
+                    self.y += self.speed
+                if playerpos[1] <= self.y:
+                    self.y -= self.speed
     
-    def draw(self, playerpos, pA, pL, screen):
+    def draw(self, playerpos, pA, pL, screen, pz):
         if not self.wall:
             return
         px, py = playerpos
@@ -34,17 +57,17 @@ class NPC:
         if self.x == px and self.y == py:
             return
 
-        focal = 600
 
-        screen_x = 600 + (rot_x / rot_y) * focal
+
+        screen_x = 600 + (rot_x / rot_y) * FOV
         
         d = max(1, self.dist(px, py, self.x, self.y))
         scale = 1
         scale = (scale / d)*500+1 #100 - dist(self.x,self.y,px,py)
 
-
+        pz2 = (pz-20)*((30/self.dist(px, py, self.x, self.y))*50)
         #self.image.move((screen_x, -(pL)+400))
-        self.image.centerscale((screen_x, pL*30+400),scale)
+        self.image.centerscale((screen_x, pL*30+400-pz2),scale)
         
         self.image.draw(screen)
         
@@ -54,7 +77,7 @@ class NPC:
 
 
     def raycast(self, px, py, wx1, wy1, wx2, wy2):
-        if self.intersect((self.x, self.y),(px, py),(wx1, wy1),(wx2, wy2)):
+        if self.intersect((self.x, self.y),(px, py),(wx1, wy1),(wx2, wy2)): #easy
             self.wall = False
 
 

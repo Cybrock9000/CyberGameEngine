@@ -35,6 +35,53 @@ def savemap(name,maplst,wallamount):
     with open(fileS, "w") as file:
         file.write(content)
         
+
+
+def savefloor(name,flrlist1,flrlist2,flrlist3,flrlist4,flrlist5):
+    fileS = f"{name}/map.py" #save the current map after making a wall
+
+    with open(fileS, "r") as file:
+        content = file.read()
+
+    content = re.sub(r"^floorTL\s*=.*$",f"floorTL = {flrlist1}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+        
+    with open(fileS, "r") as file:
+        content = file.read()
+
+    content = re.sub(r"^floorTR\s*=.*$",f"floorTR = {flrlist2}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+        
+    with open(fileS, "r") as file:
+        content = file.read()
+
+    content = re.sub(r"^floorBL\s*=.*$",f"floorBL = {flrlist3}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+        
+    with open(fileS, "r") as file:
+        content = file.read()
+
+    content = re.sub(r"^floorBR\s*=.*$",f"floorBR = {flrlist4}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+        
+    with open(fileS, "r") as file:
+        content = file.read()
+
+    content = re.sub(r"^floorC\s*=.*$",f"floorC = {flrlist5}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+        
+
+        
 def updatePlayerPos(name,pos):
     fileS = f"{name}/main.py" #change the players position
 

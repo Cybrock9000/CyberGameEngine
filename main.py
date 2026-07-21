@@ -156,6 +156,11 @@ def main(): #looking back on it now, i could have used classes instead
     
     wallColor = (255,0,0)
     grid = mapFile.wall_data
+    FTLgrid = mapFile.floorTL
+    FTRgrid = mapFile.floorTR
+    FBLgrid = mapFile.floorBL
+    FBRgrid = mapFile.floorBR
+    FCgrid = mapFile.floorC
     wallamount = mapFile.wallamount
     
     #pannels
@@ -168,6 +173,7 @@ def main(): #looking back on it now, i could have used classes instead
 
     scrolly = 0
     actualScroll = 0
+    floorstuff = False
     
     # -------== images ==--------------------------------------------------------------------------------------------------------------
     
@@ -221,6 +227,8 @@ def main(): #looking back on it now, i could have used classes instead
     sminusB = Button("resources/textures/minus.png", (845, 25), 3, 3)
     oplusB = Button("resources/textures/plus.png", (440, 25), 3, 3) # the s is script
     ominusB = Button("resources/textures/minus.png", (560, 25), 3, 3)
+    
+    wallfloorB = Button("resources/textures/wallB.png", (300, 700), 3, 3)
     
     colorB = Button("resources/textures/color.png", (25, 635), 3, 3)
     
@@ -471,20 +479,31 @@ def main(): #looking back on it now, i could have used classes instead
         if wplusB.is_pressed() and buttonDelay9 == False:
             
             clickA(click)
-            
-            if point == 0:
-                point = 1
-                pointx, pointy = gcloc2 #this makes clicking with the grid pointer calculate the world pos instead of the grid pos
-                print((pointx,pointy))
-                
-            elif point == 1:
-                point = 0
-                pointx2, pointy2 = gcloc2
-                print((pointx2,pointy2))
-                grid.append([pointx,-pointy,pointx2,-pointy2, wallColor])
-                wallamount += 1
-                print(grid)
-                savemap(name,grid,wallamount)
+            if floorstuff == True:
+                if point == 0:
+                    point = 1
+                    pointx, pointy = gcloc2
+                    
+                elif point == 1:
+                    point = 0
+                    pointx2, pointy2 = gcloc2
+                    FTLgrid.append([pointx2,-pointy2])
+                    FTRgrid.append([pointx,-pointy2])
+                    FBLgrid.append([pointx2,-pointy])
+                    FBRgrid.append([pointx,-pointy])
+                    FCgrid.append(wallColor)
+                    savefloor(name,FTLgrid,FTRgrid,FBLgrid,FBRgrid,FCgrid)
+            else:
+                if point == 0:
+                    point = 1
+                    pointx, pointy = gcloc2 #this makes clicking with the grid pointer calculate the world pos instead of the grid pos
+                    
+                elif point == 1:
+                    point = 0
+                    pointx2, pointy2 = gcloc2
+                    grid.append([pointx,-pointy,pointx2,-pointy2, wallColor])
+                    wallamount += 1
+                    savemap(name,grid,wallamount)
             
             buttonDelay9 = True
             
@@ -647,10 +666,19 @@ def main(): #looking back on it now, i could have used classes instead
             
             clickA(click)
             path = os.getcwd()
-            if len(grid) >= 0:
-                grid.pop()
-                wallamount -= 1
-                savemap(name,grid,wallamount)
+            if floorstuff == True:
+                if len(FCgrid) >= 0:
+                    FCgrid.pop()
+                    FTLgrid.pop()
+                    FTRgrid.pop()
+                    FBLgrid.pop()
+                    FBRgrid.pop()
+                    savefloor(name,FTLgrid,FTRgrid,FBLgrid,FBRgrid,FCgrid)
+            else:
+                if len(grid) >= 0:
+                    grid.pop()
+                    wallamount -= 1
+                    savemap(name,grid,wallamount)
             buttonDelay19 = True
             
         elif wminusB.is_pressed() and buttonDelay19 == True:
@@ -705,6 +733,26 @@ def main(): #looking back on it now, i could have used classes instead
         else: 
              buttonDelay22 = False
              
+
+
+        if wallfloorB.is_pressed() and buttonDelay35 == False:
+            
+            clickA(click)
+
+            if floorstuff == False:
+                wallfloorB.new_image("resources/textures/floorB.png", (300, 700), 3, 3)
+                floorstuff = True
+            else:
+                wallfloorB.new_image("resources/textures/wallB.png", (300, 700), 3, 3)
+                floorstuff = False
+
+            buttonDelay35 = True
+            
+        elif wallfloorB.is_pressed() and buttonDelay35 == True:
+            pass
+        else: 
+             
+             buttonDelay35 = False
 
 
 
@@ -831,12 +879,74 @@ def main(): #looking back on it now, i could have used classes instead
             pass
         else: 
              buttonDelay30 = False
+             
+
+
+
+
+
+        if bob1.is_pressed() and buttonDelay31 == False:
+            
+            clickA(click)
+            Spath = f'{name}/objects/{Sobjects[actualScroll]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay31 = True
+            
+        elif bob1.is_pressed() and buttonDelay31 == True:
+            pass
+        else: 
+             buttonDelay31 = False
+             
+        if bob2.is_pressed() and buttonDelay32 == False:
+            
+            clickA(click)
+            Spath = f'{name}/objects/{Sobjects[actualScroll+1]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay32 = True
+            
+        elif bob2.is_pressed() and buttonDelay32 == True:
+            pass
+        else: 
+             buttonDelay32 = False
+             
+        if bob3.is_pressed() and buttonDelay33 == False:
+            
+            clickA(click)
+            Spath = f'{name}/objects/{Sobjects[actualScroll+2]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay33 = True
+            
+        elif bob3.is_pressed() and buttonDelay33 == True:
+            pass
+        else: 
+             buttonDelay33 = False
+             
+        if bob4.is_pressed() and buttonDelay34 == False:
+            
+            clickA(click)
+            Spath = f'{name}/objects/{Sobjects[actualScroll+3]}'
+            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+            cyideprocess.start()
+            
+            buttonDelay34 = True
+            
+        elif bob4.is_pressed() and buttonDelay34 == True:
+            pass
+        else: 
+             buttonDelay34 = False
 
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
         
 
         window.fill('black')
+        mapgridflr(window, name, mapx, mapy, scale,FTLgrid,FTRgrid,FBLgrid,FBRgrid,FCgrid)
         mapgrid(window, name, mapx, mapy, scale,grid,wallamount)
         if point == 1:
             pg.draw.line(window,wallColor,(((pointx - mapx))* scale, ((pointy + mapy))* scale),(((cmapx - mapx))* scale, ((cmapy + mapy))* scale),2) #drawing the line for making new walls
@@ -893,7 +1003,7 @@ def main(): #looking back on it now, i could have used classes instead
         helpB.draw(window)
         CompileB.draw(window)
         testB.draw(window)
-        PlayerSB.draw(window)
+        #PlayerSB.draw(window)
         projectFB.draw(window)
         audioB.draw(window)
         settingsB.draw(window)
@@ -934,6 +1044,7 @@ def main(): #looking back on it now, i could have used classes instead
         colorB.draw(window)
         pStartB.draw(window)
         CspeedB.draw(window)
+        wallfloorB.draw(window)
         
         splusB.draw(window)
         sminusB.draw(window)
@@ -966,6 +1077,11 @@ def mapgrid(window,name, x, y, scale, grid, wallamount): #this is how the map is
         pg.draw.line(window,c,(((x1-x)*scale),((-y1+y)*scale)),((x2-x)*scale,(-y2+y)*scale),2) #drawing walls
     #this whole script was easyer than I thought
     
+def mapgridflr(window, name, x, y, scale,FTLgrid,FTRgrid,FBLgrid,FBRgrid,FCgrid):
+    
+    for i in range(len(FCgrid)):
+            
+        pg.draw.polygon(window,FCgrid[i],[((FTLgrid[i][0]-x)*scale, (y-FTLgrid[i][1])*scale),((FTRgrid[i][0]-x)*scale, (y-FTRgrid[i][1])*scale),((FBRgrid[i][0]-x)*scale, (y-FBRgrid[i][1])*scale),((FBLgrid[i][0]-x)*scale, (y-FBLgrid[i][1])*scale),])
 # -------== Pannels ==--------------------------------------------------------------------------------------------------------------
 def loadScripts(name,font,text):
     
@@ -1051,7 +1167,7 @@ def scaleScreen(start_res, end_res,window):
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [1190, 0, 10, 800], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 400, 10, 800], 0)
         pg.draw.rect(window, ANEVENDARKERSPECIALDARKGREY, [0, 790, 1400, 10], 0)
-        scaleIMG.draw(window) # image to make it look even smoother
+        #scaleIMG.draw(window) # image to make it look even smoother
         pg.display.flip()
         pg.time.delay(5) #speed
 
