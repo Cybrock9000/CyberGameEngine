@@ -10,6 +10,7 @@ from CybrocksLibraryG import *
 import os
 from npc_handler import *
 from npc import *
+from light import *
 from state import *
 
 
@@ -372,8 +373,12 @@ def npcraycast(handler, px, py, newwalldata):
     for npc in handler.npc_list:
         npc.wall = True #set it first (totaly didnt have this effect me at first)
 
+    for light in handler.light_list:
+            light.wall = True
+            
     for x1, y1, x2, y2, c in newwalldata:
         handler.raycast(px, py, x1, y1, x2, y2)
+        handler.lraycast(px, py, x1, y1, x2, y2)
 
 
 
@@ -515,11 +520,20 @@ def draw(window,px,py,pz,pa,pl,col,NpcHandler,radcos,radsin):    #drawing walls 
         if d > rayDist:
             continue
         
-        if DARK == True:
-            
+        if DARK:
+            brightness = 0.0
 
-            d = max(1, dist(px, py, mx, my))
-            c2 = (min(c[0], int(c[0] / d * SHADOW_DIST + 1)),min(c[1], int(c[1] / d * SHADOW_DIST + 1)),min(c[2], int(c[2] / d * SHADOW_DIST + 1)))
+            for light in NpcHandler.light_list:
+                d = max(1.0, dist(mx, my, light.x, light.y))
+                brightness += light.strength / d
+
+            brightness = min(brightness, 1.0)
+
+            c2 = (
+                int(c[0] * brightness),
+                int(c[1] * brightness),
+                int(c[2] * brightness),
+            )
         else:
             c2 = c
         #pg.gfxdraw.textured_polygon(window,((wallx[walls][0],wally[walls][0]),(wallx[walls][1],wally[walls][1]),(wallx[walls][3],wally[walls][3]),(wallx[walls][2],wally[walls][2])),image,0,0)
@@ -587,6 +601,8 @@ def loadObjectScripts(lines,NpcHandler):
 
         if line.startswith("NPC"):
             NpcHandler.npc_list.append(NPC(script=value))
+        if line.startswith("LIGHT"):
+            NpcHandler.light_list.append(LIGHT(script=value))
 
 
 

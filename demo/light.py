@@ -8,19 +8,13 @@ import state
 import main
 
 
-class NPC:
+class LIGHT:
     def __init__(self, script=''):
         with open(os.path.join(os.curdir, script), "r") as f:
             data = json.load(f)
             
-        self.x,self.y = data['pos']
-        self.Health = data['Health']
-        self.CanMove = data['CanMove']
-        self.speed = data['speed']
-        self.pathfinding = data['pathfinding']
-        self.pickup = data['pickup']
-        self.pickupitem = data['pickupitem']
-        self.pickupweapon = data['pickupweapon']
+        self.x,self.y,self.z = data['pos']
+        self.strength = data['strength']
         self.image = BetterImage(data['path'],(0,0),data['scale'],data['scale'])
         self.dx, self.dy, self.screen_x = 0,0,0
         self.wall = True
@@ -29,35 +23,13 @@ class NPC:
 
     def update(self,playerpos,A,pL,screen,pz):
         self.draw(playerpos,A,pL,screen,pz)
-        self.move(playerpos)
-        if self.pathfinding == 'T':
-            if self.dist(playerpos[0],playerpos[1],self.x,self.y) <= 10:
-                main.HEALTH -= 1
-        if self.pickup == 'T':
-            if self.dist(playerpos[0],playerpos[1],self.x,self.y) <= 10:
-                state.changeTool(self.pickupweapon, 0)
-                self.remove = True
+        #self.move(playerpos)
         
 
-    def move(self,playerpos):
-        if self.CanMove == 'T':
-            if self.pathfinding == 'T':
-                pass
-            else:
-                if playerpos[0] >= self.x:
-                    self.x += self.speed
-                if playerpos[0] <= self.x:
-                    self.x -= self.speed
-                    
-                if playerpos[1] >= self.y:
-                    self.y += self.speed
-                if playerpos[1] <= self.y:
-                    self.y -= self.speed
     
     def draw(self, playerpos, pA, pL, screen, pz):
         if not self.wall:
             return
-        
         px, py = playerpos
         A = M.radians(pA)
 
@@ -79,10 +51,10 @@ class NPC:
         d = max(1, self.dist(px, py, self.x, self.y))
         scale = 1
         scale = (scale / d)*500+1 #100 - dist(self.x,self.y,px,py)
-
+        y_offset = self.z * scale 
         pz2 = (pz-20)*((30/self.dist(px, py, self.x, self.y))*50)
         #self.image.move((screen_x, -(pL)+400))
-        self.image.centerscale((screen_x, pL*30+400-pz2),scale)
+        self.image.centerscale((screen_x, pL*30+400-pz2 - y_offset),scale)
         
         self.image.draw(screen)
         

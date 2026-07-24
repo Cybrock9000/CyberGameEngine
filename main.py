@@ -341,7 +341,7 @@ def main(): #looking back on it now, i could have used classes instead
         if helpB.is_pressed() and buttonDelay2 == False:
             
             clickA(click)
-            webbrowser.open('https://cybrock9000.github.io/CyberWolfGames/engineDocs.html')
+            webbrowser.open('file://' + os.path.realpath('docs.html'))
             buttonDelay2 = True
             
         elif helpB.is_pressed() and buttonDelay2 == True:

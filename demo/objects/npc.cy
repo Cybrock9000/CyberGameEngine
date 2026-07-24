@@ -9,6 +9,9 @@ Type NPCDOC
 NPC objects/test.json
 NPC objects/test2.json
 
+LIGHT objects/lights.json
+LIGHT objects/lights2.json
+
 Done
 
 
