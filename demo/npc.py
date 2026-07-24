@@ -4,6 +4,8 @@ import os
 import math as M
 from settings import *
 import json
+import state
+import main
 
 
 class NPC:
@@ -12,17 +14,29 @@ class NPC:
             data = json.load(f)
             
         self.x,self.y = data['pos']
+        self.Health = data['Health']
         self.CanMove = data['CanMove']
         self.speed = data['speed']
         self.pathfinding = data['pathfinding']
+        self.pickup = data['pickup']
+        self.pickupitem = data['pickupitem']
+        self.pickupweapon = data['pickupweapon']
         self.image = BetterImage(data['path'],(0,0),data['scale'],data['scale'])
         self.dx, self.dy, self.screen_x = 0,0,0
         self.wall = True
+        self.remove = False
     
 
     def update(self,playerpos,A,pL,screen,pz):
         self.draw(playerpos,A,pL,screen,pz)
         self.move(playerpos)
+        if self.pathfinding == 'T':
+            if self.dist(playerpos[0],playerpos[1],self.x,self.y) <= 10:
+                main.HEALTH -= 1
+        if self.pickup == 'T':
+            if self.dist(playerpos[0],playerpos[1],self.x,self.y) <= 10:
+                state.changeTool(self.pickupweapon, 0)
+                self.remove = True
         
 
     def move(self,playerpos):

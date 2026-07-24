@@ -10,10 +10,10 @@ from CybrocksLibraryG import *
 import os
 from npc_handler import *
 from npc import *
+from state import *
 
 
 def main():
-    
     # inits
 
     pg.init()
@@ -47,6 +47,7 @@ def main():
         hud = BetterImage(os.curdir +"/resources/textures/hud.png", (0, 0), 2, 2)
     if DARK == True:
         vig = BetterImage(os.curdir +"/resources/textures/Vignette.png", (0, 0), 2, 2)
+    healthBar = BetterImage(os.curdir +"/resources/textures/health/healthFull.png", (200, 625), 8, 8)
 
     playerStartPos = (0, 0, 20)
     px,py,pz= playerStartPos
@@ -59,6 +60,7 @@ def main():
     grounded = True
     handbob = 0
     bobDir = 1
+    pew = False
     
     SPEED, HEALTH, CanRun, CanCrouch = loadPlayerScripts(playerS)
     loadObjectScripts(npcS,NpcHandler)
@@ -121,7 +123,13 @@ def main():
             bobDir = -1
         if handbob <= -10:
             bobDir = 1
-        
+
+        if state.tool != "Empty":
+            hand = BetterImage(os.curdir + f"/resources/textures/w/hand{state.tool}.png",(RES[0]/4+15, RES[1]/4),5, 5)
+        else:
+            hand = BetterImage(os.curdir + "/resources/textures/w/handEmpty.png",(RES[0]/4+15, RES[1]/4),5, 5)
+
+            
         oldpx = px
         oldpy = py
         if keys[pg.K_w]:
@@ -148,7 +156,14 @@ def main():
             handbob += bobDir
             hand.move((RES[0]/4+15, RES[1]/4+handbob))
             
-            
+        mouse_buttons = pg.mouse.get_pressed()
+        if mouse_buttons[0]:
+            if pew == False:
+                if state.tool == 'Gun':
+                    pew = True
+                    raycastShoot(window, px, py, pz, pa,NpcHandler)
+        if not mouse_buttons[0]:
+            pew = False
 
         #print(grounded)
         # jumping
@@ -218,21 +233,38 @@ def main():
             sky2.move((-(pa*skyrot)+1875,-631+pl*30))
         sky.draw(window)
         sky2.draw(window)
-        drawFloor(window,px,py,pz,pa,pl)
-        col = draw(window,px,py,pz,pa,pl,col,NpcHandler) #janky way on simple collision by using the draw method and raycaster, but it works for now
+        
+        angle = M.radians(pa)
+        radcos = M.cos(angle) * 0.5
+        radsin = M.sin(angle) * 0.5
+        if FLOOR == 1:
+            drawFloor(window, px, py, pz, pl, radcos, radsin)
+        col = draw(window,px,py,pz,pa,pl,col,NpcHandler,radcos,radsin) #janky way on simple collision by using the draw method and raycaster, but it works for now
         NpcHandler.update((px,py),pa,pl,window,pz)
         if col:
             px = oldpx
             py = oldpy
             
 
-        hand.draw(window)   
+        hand.draw(window)  
+         
             
         if DARK == True:
             vig.draw(window)
 
         if EHUD == True:
-            hud.draw(window)      
+            hud.draw(window)     
+            if HEALTH <=100:
+                healthBar.new_image(os.curdir +"/resources/textures/health/healthFull.png", (200, 625), 8, 8)
+            elif HEALTH <=80:
+                healthBar.new_image(os.curdir +"/resources/textures/health/health80.png", (200, 625), 8, 8)
+            elif HEALTH <=50:
+                healthBar.new_image(os.curdir +"/resources/textures/health/health50.png", (200, 625), 8, 8)
+            elif HEALTH <=25:
+                healthBar.new_image(os.curdir +"/resources/textures/health/health25.png", (200, 625), 8, 8)
+            elif HEALTH <=0:
+                healthBar.new_image(os.curdir +"/resources/textures/health/health0.png", (200, 625), 8, 8)
+            healthBar.draw(window)  
            
 
         pg.display.flip()
@@ -291,11 +323,32 @@ def raycastCOL(window, px, py, pz, pa, wx1, wy1, wx2, wy2):  # this checks for w
 
             if intersect((px, py), (sx, sy),(wx1, wy1), (wx2, wy2)):
                 return True #a wall is there
-            
+
     return False #no wall
+
+def raycastShoot(window, px, py, pz, pa, NpcHandler):
+    rayangle = M.radians(pa)
+
+    dx = M.sin(rayangle)
+    dy = M.cos(rayangle)
+
+    sx, sy = px, py
+
+    for move in range(500):
+        sx += dx
+        sy += dy
+
+        #pg.draw.circle(window, "blue", (int(sx), int(sy)), 2)
+
+        for npc in NpcHandler.npc_list:
+            if (intersect((px, py), (sx, sy),(npc.x - 10, npc.y - 10),(npc.x + 10, npc.y + 10)) or intersect((px, py), (sx, sy),(npc.x - 10, npc.y + 10),(npc.x + 10, npc.y - 10))):
+                npc.remove = True
+                return True
+
+    return False
     
 
-def reorderwalls(px, py):
+def reorderwalls(px, py): # for drawing order from furthest to closest
     wall_distances = []
 
     for wall in wall_data:
@@ -326,10 +379,7 @@ def npcraycast(handler, px, py, newwalldata):
 
 
 
-def drawFloor(window, px, py, pz, pa, pl):
-    angle = pa/180*M.pi
-    radcos = M.cos(angle)/2
-    radsin = M.sin(angle)/2
+def drawFloor(window, px, py, pz, pl, radcos, radsin):
 
     near = 0.1
     draw = pg.draw.polygon
@@ -365,13 +415,14 @@ def drawFloor(window, px, py, pz, pa, pl):
             
         fx = (tl[0] + br [0]) / 2
         fy = (tl[1] + br [1]) / 2
-        d = dist(px, py, fx, fy)
-        if d > rayDist:
+        
+        dx = fx - px
+        dy = fy - py
+
+        if dx*dx + dy*dy > rayDist*rayDist:
             continue
         
         if DARK == True:
-
-
                     d = dist(px, py, fx, fy)
                     d = max(1, d)
                     c2 = (min(color[0], int(color[0] / d * SHADOW_DIST + 1)),min(color[1], int(color[1] / d * SHADOW_DIST + 1)),min(color[2], int(color[2] / d * SHADOW_DIST + 1)))
@@ -382,7 +433,7 @@ def drawFloor(window, px, py, pz, pa, pl):
 
 
 
-def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
+def draw(window,px,py,pz,pa,pl,col,NpcHandler,radcos,radsin):    #drawing walls and such
     col = False
     newwalldata = reorderwalls(px, py)
     npcraycast(NpcHandler,px,py,newwalldata)
@@ -390,8 +441,8 @@ def draw(window,px,py,pz,pa,pl,col,NpcHandler):    #drawing walls and such
     
     for walls in range(len(newwalldata)):
         
-        radcos = M.cos(pa/180*M.pi)/2
-        radsin = M.sin(pa/180*M.pi)/2
+        #radcos = M.cos(pa/180*M.pi)/2
+        #radsin = M.sin(pa/180*M.pi)/2
         #radcos = M.cos(M.radians(pa))
         #radsin = M.sin(M.radians(pa))
 
@@ -536,8 +587,8 @@ def loadObjectScripts(lines,NpcHandler):
 
         if line.startswith("NPC"):
             NpcHandler.npc_list.append(NPC(script=value))
-                
-    
+
+
 
 if __name__ == "__main__":
     main()

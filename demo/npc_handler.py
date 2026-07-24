@@ -11,6 +11,7 @@ class npcHandler:
 
     def update(self,playerpos,A,pL,screen,pz):
         [npc.update(playerpos,A,pL,screen,pz) for npc in self.npc_list]
+        self.npc_list = [npc for npc in self.npc_list if not npc.remove]
         
 
     def add_npc(self, npc):

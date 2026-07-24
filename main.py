@@ -174,6 +174,7 @@ def main(): #looking back on it now, i could have used classes instead
     scrolly = 0
     actualScroll = 0
     floorstuff = False
+    meassure = False
     
     # -------== images ==--------------------------------------------------------------------------------------------------------------
     
@@ -195,6 +196,8 @@ def main(): #looking back on it now, i could have used classes instead
     scrollIB = Button("resources/textures/EAButton.png", (1210, 90), 3, 3)
     gameSB = Button("resources/textures/GSButton.png", (1000, 85), 3, 3)
     darkB = Button("resources/textures/DButton.png", (1210, 10), 3, 3)
+    floorB = Button("resources/textures/FButton.png", (1210, 85), 3, 3)
+    
      
     
     if EngineAudio == True:
@@ -211,6 +214,11 @@ def main(): #looking back on it now, i could have used classes instead
         darkB.new_image("resources/textures/DTButton.png", (1210, 10), 3, 3)
     else:
         darkB.new_image("resources/textures/DButton.png", (1210, 10), 3, 3)
+
+    if settingsFile.FLOOR == True:
+        floorB.new_image("resources/textures/EFButton.png", (1210, 85), 3, 3)
+    else:
+        floorB.new_image("resources/textures/FButton.png", (1210, 85), 3, 3)
         
     upB = Button("resources/textures/up.png", (160, 425), 3, 3)
     downB = Button("resources/textures/down.png", (160, 485), 3, 3)
@@ -223,10 +231,8 @@ def main(): #looking back on it now, i could have used classes instead
     zminusB = Button("resources/textures/minus.png", (220, 425), 3, 3)
     wplusB = Button("resources/textures/plus.png", (100, 700), 3, 3) # the w is wall
     wminusB = Button("resources/textures/minus.png", (220, 700), 3, 3)
-    splusB = Button("resources/textures/plus.png", (725, 25), 3, 3) # the s is script
-    sminusB = Button("resources/textures/minus.png", (845, 25), 3, 3)
-    oplusB = Button("resources/textures/plus.png", (440, 25), 3, 3) # the s is script
-    ominusB = Button("resources/textures/minus.png", (560, 25), 3, 3)
+    sfolderB = Button("resources/textures/scriptsF.png", (740, 25), 3, 3)
+    ofolderB = Button("resources/textures/objectsF.png", (460, 25), 3, 3)
     
     wallfloorB = Button("resources/textures/wallB.png", (300, 700), 3, 3)
     
@@ -243,6 +249,9 @@ def main(): #looking back on it now, i could have used classes instead
     swdownB = Button("resources/textures/down.png", (160, 635), 3, 3)
     swleftB = Button("resources/textures/left.png", (100, 635), 3, 3)
     swrightB = Button("resources/textures/right.png", (220, 635), 3, 3)
+
+    mesB = Button("resources/textures/mesB.png", (300, 570), 3, 3)
+
     
 
 
@@ -272,10 +281,11 @@ def main(): #looking back on it now, i could have used classes instead
     while runningMain:
         
         # -------== controls and keys and buttons ==--------------------------------------------------------------------------------------------------------------
-        
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 runningMain = False
+            
+
                 
             if event.type == MOUSEWHEEL:
                 if mouseINV:
@@ -288,7 +298,31 @@ def main(): #looking back on it now, i could have used classes instead
                     scrolly = 0
                 if actualScroll >= 0:
                     actualScroll = 0
+
+
+        keys = pg.key.get_pressed()
+
+        if keys[pg.K_a]:
+            mapx -= gspeed
+        if keys[pg.K_d]:
+            mapx += gspeed
+        if keys[pg.K_w]:
+            mapy += gspeed
+        if keys[pg.K_s]:
+            mapy -= gspeed
+        if keys[pg.K_e]:
+            scale += 0.01
+        if keys[pg.K_q]:
+            scale -= 0.01
         
+        if keys[pg.K_UP] and not snap:
+            cmapy -= cspeed
+        if keys[pg.K_DOWN] and not snap:
+            cmapy += cspeed
+        if keys[pg.K_LEFT] and not snap:
+            cmapx -= cspeed
+        if keys[pg.K_RIGHT] and not snap:
+            cmapx += cspeed
 
 
         if creditsB.is_pressed() and buttonDelay == False:
@@ -321,7 +355,7 @@ def main(): #looking back on it now, i could have used classes instead
             
             clickA(click)
             subprocess.run([sys.executable, "main.py"],cwd=os.path.join(os.getcwd(), name))
-            print(os.path.join(os.getcwd(), name))
+            #print(os.path.join(os.getcwd(), name))
             #subprocess.run(["python", f"{name}/main.py"])
             buttonDelay3 = True
             
@@ -393,6 +427,32 @@ def main(): #looking back on it now, i could have used classes instead
              buttonDelay7 = False
 
 
+        if sfolderB.is_pressed() and buttonDelay44 == False:
+                    
+            clickA(click)
+            path = os.getcwd()
+            subprocess.Popen(f'explorer /commit,"{path}\{name}\scripts\"')
+            buttonDelay44 = True
+                    
+        elif sfolderB.is_pressed() and buttonDelay44 == True:
+            pass
+        else: 
+            buttonDelay44 = False
+
+
+        if ofolderB.is_pressed() and buttonDelay45 == False:
+                            
+            clickA(click)
+            path = os.getcwd()
+            subprocess.Popen(f'explorer /commit,"{path}\{name}\objects\"')
+            buttonDelay45 = True
+                            
+        elif ofolderB.is_pressed() and buttonDelay45 == True:
+            pass
+        else: 
+            buttonDelay45 = False
+
+
         if EaudioB.is_pressed() and buttonDelay6 == False and screenS == True:
             
             clickA(click)
@@ -447,7 +507,7 @@ def main(): #looking back on it now, i could have used classes instead
         if wrightB.is_pressed() and snap == False:
             cmapx += cspeed
             
-        if GspeedB.is_pressed() and buttonDelay8 == False:
+        if (GspeedB.is_pressed() and buttonDelay8 == False) or (keys[pg.K_TAB] and buttonDelay8 == False):
             
             clickA(click)
             
@@ -470,7 +530,7 @@ def main(): #looking back on it now, i could have used classes instead
             
             buttonDelay8 = True
             
-        elif GspeedB.is_pressed() and buttonDelay8 == True:
+        elif (GspeedB.is_pressed() and buttonDelay8 == True) or (keys[pg.K_TAB] and buttonDelay8 == True):
             pass
         
         else: 
@@ -528,6 +588,8 @@ def main(): #looking back on it now, i could have used classes instead
             
             clickA(click)
             c1 = colorchooser.askcolor(title ="Choose color")
+            if c1[0] == None:
+                c1 = [(255,255,255)]
             wallColor = c1[0]
             buttonDelay11 = True
             
@@ -568,51 +630,51 @@ def main(): #looking back on it now, i could have used classes instead
         else: 
              buttonDelay12 = False
              
-        if swupB.is_pressed() and buttonDelay13 == False and snap == True:
+        if (swupB.is_pressed() and buttonDelay13 == False and snap == True) or (keys[pg.K_UP] and buttonDelay13 == False and snap == True):
             
             clickA(click)
             
             cmapy -= cspeed
             buttonDelay13 = True
             
-        elif swupB.is_pressed() and buttonDelay13 == True:
+        elif (swupB.is_pressed() and buttonDelay13 == True) or (keys[pg.K_UP] and buttonDelay13 == True):
             pass
         else: 
              buttonDelay13 = False
              
-        if swdownB.is_pressed() and buttonDelay14 == False and snap == True:
+        if (swdownB.is_pressed() and buttonDelay14 == False and snap == True) or (keys[pg.K_DOWN] and buttonDelay14 == False and snap == True):
             
             clickA(click)
             
             cmapy += cspeed
             buttonDelay14 = True
             
-        elif swdownB.is_pressed() and buttonDelay14 == True:
+        elif (swdownB.is_pressed() and buttonDelay14 == True) or (keys[pg.K_DOWN] and buttonDelay14 == True):
             pass
         else: 
              buttonDelay14 = False
              
-        if swleftB.is_pressed() and buttonDelay15 == False and snap == True:
+        if (swleftB.is_pressed() and buttonDelay15 == False and snap == True) or (keys[pg.K_LEFT] and buttonDelay15 == False and snap == True):
             
             clickA(click)
             
             cmapx -= cspeed
             buttonDelay15 = True
             
-        elif swleftB.is_pressed() and buttonDelay15 == True:
+        elif (swleftB.is_pressed() and buttonDelay15 == True) or (keys[pg.K_LEFT] and buttonDelay15 == True):
             pass
         else: 
              buttonDelay15 = False
              
 
-        if swrightB.is_pressed() and buttonDelay16 == False and snap == True:
+        if (swrightB.is_pressed() and buttonDelay16 == False and snap == True) or (keys[pg.K_RIGHT] and buttonDelay16 == False and snap == True):
             
             clickA(click)
             
             cmapx += cspeed
             buttonDelay16 = True
             
-        elif swrightB.is_pressed() and buttonDelay16 == True:
+        elif (swrightB.is_pressed() and buttonDelay16 == True) or (keys[pg.K_RIGHT] and buttonDelay16 == True):
             pass
         else: 
              buttonDelay16 = False
@@ -732,6 +794,19 @@ def main(): #looking back on it now, i could have used classes instead
             pass
         else: 
              buttonDelay22 = False
+
+
+        if floorB.is_pressed() and buttonDelay37 == False and screenG == True:
+                    
+            clickA(click)
+            updateFloor(name, -settingsFile.FLOOR)
+            tk.messagebox.showwarning("info", "Restart to take request to effect in editor but should testing work!")
+            buttonDelay37 = True
+                    
+        elif floorB.is_pressed() and buttonDelay37 == True:
+            pass
+        else: 
+            buttonDelay37 = False
              
 
 
@@ -764,9 +839,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb1.is_pressed() and buttonDelay23 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll]}' #open the file that is at the button
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll]}' #open the file that is at the button
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay23 = True
             
@@ -779,9 +855,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb2.is_pressed() and buttonDelay24 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+1]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+1]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay24 = True
             
@@ -794,9 +871,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb3.is_pressed() and buttonDelay25 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+2]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+2]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay25 = True
             
@@ -809,9 +887,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb4.is_pressed() and buttonDelay26 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+3]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+3]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay26 = True
             
@@ -824,9 +903,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb5.is_pressed() and buttonDelay27 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+4]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+4]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay27 = True
             
@@ -837,11 +917,12 @@ def main(): #looking back on it now, i could have used classes instead
              
 
         if bsb6.is_pressed() and buttonDelay28 == False:
-            
+
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+5]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+5]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay28 = True
             
@@ -854,9 +935,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb7.is_pressed() and buttonDelay29 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+6]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+6]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay29 = True
             
@@ -869,9 +951,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bsb8.is_pressed() and buttonDelay30 == False:
             
             clickA(click)
-            Spath = f'{name}/scripts/{Sscripts[actualScroll+7]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sscripts):
+                Spath = f'{name}/scripts/{Sscripts[actualScroll+7]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay30 = True
             
@@ -888,9 +971,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bob1.is_pressed() and buttonDelay31 == False:
             
             clickA(click)
-            Spath = f'{name}/objects/{Sobjects[actualScroll]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay31 = True
             
@@ -902,9 +986,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bob2.is_pressed() and buttonDelay32 == False:
             
             clickA(click)
-            Spath = f'{name}/objects/{Sobjects[actualScroll+1]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+1]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay32 = True
             
@@ -916,9 +1001,10 @@ def main(): #looking back on it now, i could have used classes instead
         if bob3.is_pressed() and buttonDelay33 == False:
             
             clickA(click)
-            Spath = f'{name}/objects/{Sobjects[actualScroll+2]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+2]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
             buttonDelay33 = True
             
@@ -927,19 +1013,96 @@ def main(): #looking back on it now, i could have used classes instead
         else: 
              buttonDelay33 = False
              
-        if bob4.is_pressed() and buttonDelay34 == False:
+        if bob4.is_pressed() and buttonDelay43 == False:
             
             clickA(click)
-            Spath = f'{name}/objects/{Sobjects[actualScroll+3]}'
-            cyideprocess = Process(target=CyIDE.run, args=(Spath,))
-            cyideprocess.start()
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+3]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
             
-            buttonDelay34 = True
+            buttonDelay43 = True
             
-        elif bob4.is_pressed() and buttonDelay34 == True:
+        elif bob4.is_pressed() and buttonDelay43 == True:
             pass
         else: 
-             buttonDelay34 = False
+             buttonDelay43 = False
+             
+        if bob5.is_pressed() and buttonDelay38 == False:
+            
+            clickA(click)
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+4]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
+            
+            buttonDelay38 = True
+            
+        elif bob5.is_pressed() and buttonDelay38 == True:
+            pass
+        else: 
+             buttonDelay38 = False
+
+        if bob6.is_pressed() and buttonDelay39 == False:
+            
+            clickA(click)
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+5]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
+            
+            buttonDelay39 = True
+            
+        elif bob6.is_pressed() and buttonDelay39 == True:
+            pass
+        else: 
+             buttonDelay39 = False
+
+        if bob7.is_pressed() and buttonDelay40 == False:
+            
+            clickA(click)
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+6]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
+            
+            buttonDelay40 = True
+            
+        elif bob7.is_pressed() and buttonDelay40 == True:
+            pass
+        else: 
+             buttonDelay40 = False
+
+        if bob8.is_pressed() and buttonDelay41 == False:
+            
+            clickA(click)
+            if 0 <= actualScroll < len(Sobjects):
+                Spath = f'{name}/objects/{Sobjects[actualScroll+7]}'
+                cyideprocess = Process(target=CyIDE.run, args=(Spath,))
+                cyideprocess.start()
+            
+            buttonDelay41 = True
+            
+        elif bob8.is_pressed() and buttonDelay41 == True:
+            pass
+        else: 
+             buttonDelay41 = False
+             
+
+        if (mesB.is_pressed() and buttonDelay36 == False) or (keys[pg.K_m] and buttonDelay36 == False):
+                    
+                    clickA(click)
+                    if meassure == True:
+                        meassure = False
+                    else:
+                        meassure = True
+                    
+                    buttonDelay36 = True
+                    
+        elif (mesB.is_pressed() and buttonDelay36 == True) or (keys[pg.K_m] and buttonDelay36 == True):
+            pass
+        else: 
+            buttonDelay36 = False
 
 
         # -------== drawing stuff ==--------------------------------------------------------------------------------------------------------------
@@ -957,6 +1120,13 @@ def main(): #looking back on it now, i could have used classes instead
         gcloc = ((cmapx-mapx)*scale, (cmapy+mapy)*scale)
         gcloc2 = (cmapx, cmapy) #took me forever to realize it was just the cursor pos and not some fancy equation
         Gcursor.move(gcloc)
+        if meassure == True:
+            pg.draw.circle(window,(0,255,255),gcloc, (10*scale),1)
+            pg.draw.circle(window,(0,255,0),gcloc, (50*scale),1)
+            pg.draw.circle(window,(255,0,0),gcloc, (100*scale),1)
+            pg.draw.circle(window,(255,0,255),gcloc, (250*scale),1)
+            pg.draw.circle(window,(0,0,255),gcloc, (500*scale),1)
+            pg.draw.circle(window,(255,255,255),gcloc, (1000*scale),1)
         Gcursor.draw(window)
         
         pg.draw.rect(window, SPECIALDARKGREY, [0, 400, 400, 400], 0) #background
@@ -1016,6 +1186,7 @@ def main(): #looking back on it now, i could have used classes instead
             
         if screenG == True:
             darkB.draw(window)
+            floorB.draw(window)
 
         #map movement buttons
         upB.draw(window)
@@ -1046,10 +1217,10 @@ def main(): #looking back on it now, i could have used classes instead
         CspeedB.draw(window)
         wallfloorB.draw(window)
         
-        splusB.draw(window)
-        sminusB.draw(window)
-        oplusB.draw(window)
-        ominusB.draw(window)
+        sfolderB.draw(window)
+        ofolderB.draw(window)
+        
+        mesB.draw(window)
 
 
 

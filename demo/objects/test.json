@@ -1,9 +1,13 @@
 {
-  "path": "resources/textures/test.png",
+  "Health": 5,
+  "path": "resources/textures/smile/0.png",
   "pos": [50, 0],
   "scale": 1,
   "shift": 0,
   "pathfinding": "F",
   "CanMove": "T",
-  "speed": 0.5
+  "speed": 0.5,
+  "pickup": "F",
+  "pickupweapon": "none",
+  "pickupitem": "none"
 }

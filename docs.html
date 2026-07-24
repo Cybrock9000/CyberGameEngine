@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CyberWolf Games</title>
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+    <style>
+        body {
+            background-color: #001483;
+        }
+
+        h1, p, div {
+            text-align: center;
+        }
+
+        .center {
+            margin: auto;
+            width: 60%;
+            border: 7px solid #0021dd;
+            background-color: #000000;
+            padding-bottom: 20px;
+            padding: 10px;
+
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        td img {
+            max-width: 75%;
+            max-height: 75%;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body style="background-color:black;">
+    <div class="center">
+        <h1 style="color:#4da0ff;">The Cyber Game Engine</h1>
+        <p style="color:#4da0ff;">Documentation</p>
+    </div>
+    <br><br>
+    <div class="center">
+        <h2 style="color:#4da0ff;">The Engine Key</h2>
+        <p style="color:#0021dd;">* = Updates once and you have to restart the engine to do that again (im working to fix this soon)</p>
+        <br><br>
+        <div id="Layout">
+            <h2 style="color:#4da0ff;">__--== The Layout ==--__</h2>
+        </div>
+        <p style="color:#0021dd;">The Engine consists of a lot of buttons and pannels that do many things.</p>
+        <br><br>
+        <h2 style="color:#4da0ff;">Upper Arrow Section, AKA Camera Movement</h2>
+        <img src="resources\textures\left.png" alt="l">
+        <img src="resources\textures\right.png" alt="r">
+        <img src="resources\textures\up.png" alt="u">
+        <img src="resources\textures\down.png" alt="d">
+        <p style="color:#0021dd;">We will start with the Upper Arrows. These arrow move the Grid Camera. You can also use WASD too.</p>
+        <br><br>
+        <img src="resources\textures\plus.png" alt="+">
+        <img src="resources\textures\minus.png" alt="-">
+        <p style="color:#0021dd;">The Plus and Minus buttons zoom the camera in and out. You can also use E (zoom in) and Q (zoom out)</p>
+        <br><br>
+        <img src="resources\textures\speedpoint5.png" alt="sp5">
+        <img src="resources\textures\speed1.png" alt="s1">
+        <img src="resources\textures\speed2.png" alt="s2">
+        <img src="resources\textures\speed5.png" alt="s5">
+        <img src="resources\textures\speed10.png" alt="s10">
+        <p style="color:#0021dd;">To the right of the Upper Arrows, there is a button that displays a number. This is the camera speed, how fast you move the camera. You can press tab too.</p>
+        <br><br>
+        <img src="resources\textures\setzoomto1.png" alt="szt1">
+        <p style="color:#0021dd;">This just sets the zoom to 1.</p>
+        <br><br>
+        <h2 style="color:#4da0ff;">Lower Arrow Section, AKA Wall and Floor Editing</h2>
+        <img src="resources\textures\left.png" alt="l">
+        <img src="resources\textures\right.png" alt="r">
+        <img src="resources\textures\up.png" alt="u">
+        <img src="resources\textures\down.png" alt="d">
+        <p style="color:#0021dd;">These arrows control the map cursor. You can also use the arrow keys too.</p>
+        <br><br>
+        <img src="resources\textures\plus.png" alt="+">
+        <img src="resources\textures\minus.png" alt="-">
+        <p style="color:#0021dd;">What these buttons do that is under the arrows is create walls/floors. The first click on the Plus button creates a starting point of the wall at the map cursor and the second click finishes the wall at the map cursor. If you swap to Floor Mode you would draw out its diagonal and it will show the full square when finished. Clicking the Minus button will remove the newest wall/floor made</p>
+        <br><br>
+        <img src="resources\textures\color.png" alt="c">
+        <p style="color:#0021dd;">This button allows you to change the color of the wall or floor. Pressing Cancel or X on the popup will resort to white</p>
+        <br><br>
+        <img src="resources\textures\speed1.png" alt="s1">
+        <img src="resources\textures\speed2.png" alt="s2">
+        <img src="resources\textures\speed5.png" alt="s5">
+        <img src="resources\textures\speed10C.png" alt="s10">
+        <img src="resources\textures\speed20C.png" alt="s20">
+        <p style="color:#0021dd;">This button next to the plus button and under the color button is the speed of the map cursor. The 10 and 20 speed snaps to the nearest 10th for more precision.</p>
+        <br><br>
+        <img src="resources\textures\PlayerB.png" alt="s1">
+        <p style="color:#0021dd;">This sets the player start to where the map cursor is.*</p>
+        <br><br>
+        <img src="resources\textures\wallB.png" alt="s1">
+        <img src="resources\textures\floorB.png" alt="s1">
+        <p style="color:#0021dd;">This button lets you swap between making walls and floors.</p>
+        <br><br>
+        <img src="resources\textures\mesB.png" alt="s1">
+        <p style="color:#0021dd;">This button toggles the Measuring Tool. The white ring is 1000 units and the Blue is 500u, magenta is 250u, red is 100u, green is 50u and finally cyan is 10u.</p>
+        <br><br>
+        <h2 style="color:#4da0ff;">Middle Section, AKA Scripts and Objects</h2>
+        <br><br>
+        <img src="resources\textures\scriptsF.png" alt="s1">
+        <p style="color:#0021dd;">This button opens the script folder of the game you are working on.</p>
+        <br><br>
+        <img src="resources\textures\objectsF.png" alt="s1">
+        <p style="color:#0021dd;">This button opens the objects folder of the game you are working on.</p>
+        <br><br>
+        <img src="resources\textures\blankButton.png" alt="s1">
+        <p style="color:#0021dd;">These buttons show files that you can click on to open them in CyIDE.</p>
+    </div>
+
+</body>
+</html>

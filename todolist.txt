@@ -4,10 +4,10 @@ not done = finish the template:
     done = 2d objects/sprites
     not done = simple raycast line for shooting/interacting
     not done = audio
-    done = faster raycasting, maybe threading or multiprocessing
-    not done = portals?
+    done = faster raycasting
+    not done = portals?        not going to do it yet
     not done = hud elements
-    not done = fix sky
+    kinda done = fix sky       works but not top prioraty
 
 not done = finish the engine:
     done = map editor

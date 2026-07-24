@@ -109,4 +109,21 @@ class BetterImage:
             (self.new_width, self.new_height)
         )
 
-        self.rect = self.image.get_rect(center=pos)
+        self.rect = self.image.get_rect(topleft=pos)
+
+    def centernew_image(self, image_path, pos, scalew=1.0, scaleh=1.0):
+            self.original_image = pg.image.load(image_path).convert_alpha()
+            self.image = self.original_image.copy()
+    
+            self.og_width = self.original_image.get_width()
+            self.og_height = self.original_image.get_height()
+    
+            self.new_width = int(self.og_width * scalew)
+            self.new_height = int(self.og_height * scaleh)
+    
+            self.image = pg.transform.scale(
+                self.original_image,
+                (self.new_width, self.new_height)
+            )
+    
+            self.rect = self.image.get_rect(center=pos)

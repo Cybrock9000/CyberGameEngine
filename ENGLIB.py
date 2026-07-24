@@ -106,6 +106,18 @@ def updateDarkness(name,val):
     with open(fileS, "w") as file:
         file.write(content)
 
+def updateFloor(name,val):
+    fileS = f"{name}/settings.py" #change the Darkness value
+
+    with open(fileS, "r") as file:
+        content = file.read()
+
+
+    content = re.sub(r"^FLOOR\s*=.*$",f"FLOOR = {val}",content,flags=re.MULTILINE)
+
+    with open(fileS, "w") as file:
+        file.write(content)
+
 '''def scriptCompliler(script): #might use this
     if script.endswith('.py'):
         pass

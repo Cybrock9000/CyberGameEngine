@@ -1,5 +1,5 @@
 
-VERSION = 'beta Prototype'
+VERSION = 'beta'
 
 #screen stuff
 
